@@ -1,7 +1,8 @@
-{% macro button(text, type="submit", variant="primary", extra_class="") %}
+{% macro button(text, type="submit", variant="primary", extra_class="", id="") %}
   {% set base_class = "inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2" %}
   {% set color = "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow focus:ring-indigo-500" if variant == "primary" else "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm focus:ring-slate-500" %}
   <button
+    {% if id %}id="{{ id }}"{% endif %}
     type="{{ type }}"
     class="{{ base_class }} {{ color }} {{ extra_class }}"
   >
