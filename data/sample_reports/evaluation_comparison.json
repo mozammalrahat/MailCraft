@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-06-19T12:00:00+00:00",
+  "strategies": {
+    "strategy_a": {
+      "model": "gemini-2.0-flash",
+      "averages": {
+        "fact_recall": 0.87,
+        "tone_alignment": 0.82,
+        "professional_quality": 0.81
+      }
+    },
+    "strategy_b": {
+      "model": "gemini-2.0-flash",
+      "averages": {
+        "fact_recall": 0.72,
+        "tone_alignment": 0.74,
+        "professional_quality": 0.76
+      }
+    }
+  },
+  "deltas": {
+    "baseline": "strategy_b",
+    "candidate": "strategy_a",
+    "metric_deltas": {
+      "fact_recall": 0.15,
+      "tone_alignment": 0.08,
+      "professional_quality": 0.05
+    }
+  }
+}

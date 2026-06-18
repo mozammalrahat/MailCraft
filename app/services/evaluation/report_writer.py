@@ -29,11 +29,12 @@ def write_csv_summary(report: EvaluationReport, path: Path) -> Path:
 
         for strategy_key, strategy_result in report.strategies.items():
             for scenario in strategy_result.scenarios:
-                row = {
+                row: dict[str, str] = {
                     "scenario_id": scenario.scenario_id,
                     "strategy": strategy_key,
                 }
-                row.update(scenario.scores)
+                for metric_name, score in scenario.scores.items():
+                    row[metric_name] = str(score)
                 writer.writerow(row)
 
     return path
@@ -42,13 +43,14 @@ def write_csv_summary(report: EvaluationReport, path: Path) -> Path:
 def write_comparison_report(
     report: EvaluationReport, path: Path
 ) -> Path:
+    strategies_data: dict[str, dict[str, object]] = {}
     comparison: dict[str, object] = {
         "generated_at": report.metadata.generated_at.isoformat(),
-        "strategies": {},
+        "strategies": strategies_data,
     }
 
     for strategy_key, strategy_result in report.strategies.items():
-        comparison["strategies"][strategy_key] = {
+        strategies_data[strategy_key] = {
             "model": strategy_result.model,
             "averages": strategy_result.averages,
         }

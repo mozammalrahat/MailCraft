@@ -15,6 +15,7 @@ dependencies = [
 
 [project.scripts]
 mailcraft = "app.main:run"
+mailcraft-eval = "app.cli.evaluation:main"
 
 [dependency-groups]
 dev = [
