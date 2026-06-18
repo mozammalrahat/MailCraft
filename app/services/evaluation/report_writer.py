@@ -40,9 +40,7 @@ def write_csv_summary(report: EvaluationReport, path: Path) -> Path:
     return path
 
 
-def write_comparison_report(
-    report: EvaluationReport, path: Path
-) -> Path:
+def write_comparison_report(report: EvaluationReport, path: Path) -> Path:
     strategies_data: dict[str, dict[str, object]] = {}
     comparison: dict[str, object] = {
         "generated_at": report.metadata.generated_at.isoformat(),

@@ -24,9 +24,7 @@ def load_scenarios(
     collection = ScenarioCollection.model_validate(raw)
 
     if required_count is not None and collection.count != required_count:
-        msg = (
-            f"Expected {required_count} scenarios, found {collection.count}"
-        )
+        msg = f"Expected {required_count} scenarios, found {collection.count}"
         raise ValueError(msg)
 
     return collection.scenarios

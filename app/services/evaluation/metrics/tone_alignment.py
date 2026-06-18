@@ -19,9 +19,7 @@ _jinja_env = Environment(
 )
 
 _SCORE_PATTERN = re.compile(r"SCORE:\s*(\d+)", re.IGNORECASE)
-_JUSTIFICATION_PATTERN = re.compile(
-    r"JUSTIFICATION:\s*(.+)", re.IGNORECASE | re.DOTALL
-)
+_JUSTIFICATION_PATTERN = re.compile(r"JUSTIFICATION:\s*(.+)", re.IGNORECASE | re.DOTALL)
 
 
 def _parse_judge_response(raw: str) -> tuple[int, str]:

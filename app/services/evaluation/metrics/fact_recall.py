@@ -34,9 +34,7 @@ def _match_score(fact: str, email: str) -> float:
     email_tokens = _token_set(email)
     overlap = len(fact_tokens & email_tokens) / len(fact_tokens)
 
-    substring_score = SequenceMatcher(
-        None, normalized_fact, normalized_email
-    ).ratio()
+    substring_score = SequenceMatcher(None, normalized_fact, normalized_email).ratio()
 
     return max(overlap, substring_score)
 
