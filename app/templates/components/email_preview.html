@@ -1,32 +1,64 @@
 {% import "components/ui.html" as ui %}
 
-{% if email_result %}
-  <div class="space-y-4">
-    <div class="flex items-center justify-between">
-      <h3 class="text-base font-semibold text-gray-900">Generated Email</h3>
-      <div class="flex items-center gap-2">
-        {{ ui.tone_badge(email_result.tone) }}
-        <span class="text-xs text-gray-500">{{ email_result.strategy }}</span>
+<div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden flex flex-col h-full">
+  <!-- Email Client Header -->
+  <div class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="flex gap-1.5">
+        <div class="w-3 h-3 rounded-full bg-rose-400"></div>
+        <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+        <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
       </div>
+      <span class="text-sm font-medium text-slate-500 ml-2">New Message</span>
     </div>
+    <div class="flex items-center gap-3">
+      {{ ui.tone_badge(email_result.tone) }}
+      <span class="text-xs font-medium px-2 py-1 bg-slate-100 text-slate-600 rounded-md border border-slate-200">{{ email_result.strategy }}</span>
+    </div>
+  </div>
 
+  <!-- Email Metadata -->
+  <div class="px-6 py-4 border-b border-slate-100 space-y-2">
+    <div class="flex items-center text-sm">
+      <span class="w-16 font-medium text-slate-500">To:</span>
+      <span class="text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">Recipient</span>
+    </div>
     {% if email_result.subject %}
-      <p class="text-sm text-gray-600">
-        <span class="font-medium text-gray-700">Subject:</span> {{ email_result.subject }}
-      </p>
+    <div class="flex items-center text-sm">
+      <span class="w-16 font-medium text-slate-500">Subject:</span>
+      <span class="text-slate-900 font-semibold">{{ email_result.subject }}</span>
+    </div>
     {% endif %}
+  </div>
 
+  <!-- Email Body -->
+  <div class="p-6 flex-grow bg-white">
     <div
       id="email-preview"
-      class="p-4 rounded-md bg-gray-50 border border-gray-200 whitespace-pre-wrap text-sm text-gray-800 leading-relaxed"
+      class="whitespace-pre-wrap text-base text-slate-800 leading-relaxed font-sans"
     >{{ email_result.email }}</div>
+  </div>
 
+  <!-- Email Footer / Actions -->
+  <div class="bg-slate-50 border-t border-slate-200 px-6 py-4 flex justify-end">
     <button
       type="button"
-      onclick="navigator.clipboard.writeText(document.getElementById('email-preview').innerText)"
-      class="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+      onclick="
+        navigator.clipboard.writeText(document.getElementById('email-preview').innerText);
+        const icon = this.querySelector('svg');
+        const text = this.querySelector('span');
+        const originalText = text.innerText;
+        text.innerText = 'Copied!';
+        icon.innerHTML = '<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 13l4 4L19 7\'></path>';
+        setTimeout(() => {
+          text.innerText = originalText;
+          icon.innerHTML = '<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3\'></path>';
+        }, 2000);
+      "
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-indigo-600 shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
     >
-      Copy to clipboard
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+      <span>Copy to clipboard</span>
     </button>
   </div>
-{% endif %}
+</div>

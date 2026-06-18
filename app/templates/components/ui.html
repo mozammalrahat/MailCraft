@@ -1,32 +1,33 @@
 {% macro button(text, type="submit", variant="primary", extra_class="") %}
-  {% set color = "bg-blue-600 hover:bg-blue-700" if variant == "primary" else "bg-gray-600 hover:bg-gray-700" %}
+  {% set base_class = "inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2" %}
+  {% set color = "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow focus:ring-indigo-500" if variant == "primary" else "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm focus:ring-slate-500" %}
   <button
     type="{{ type }}"
-    class="px-4 py-2 text-white rounded font-medium transition-colors {{ color }} {{ extra_class }}"
+    class="{{ base_class }} {{ color }} {{ extra_class }}"
   >
     {{ text }}
   </button>
 {% endmacro %}
 
-{% macro card(title="") %}
-  <section class="p-6 rounded-lg shadow bg-white border border-gray-100">
+{% macro card(title="", extra_class="") %}
+  <section class="p-6 sm:p-8 rounded-2xl shadow-sm bg-white border border-slate-200 {{ extra_class }}">
     {% if title %}
-      <h2 class="text-lg font-semibold mb-4 text-gray-900">{{ title }}</h2>
+      <h2 class="text-xl font-semibold mb-6 text-slate-900 tracking-tight">{{ title }}</h2>
     {% endif %}
     {{ caller() }}
   </section>
 {% endmacro %}
 
 {% macro form_field(label, name, field_type="text", value="", placeholder="", required=true, rows=1) %}
-  <div class="space-y-1">
-    <label for="{{ name }}" class="text-sm font-medium text-gray-700">{{ label }}</label>
+  <div class="space-y-1.5">
+    <label for="{{ name }}" class="block text-sm font-semibold text-slate-700">{{ label }}</label>
     {% if field_type == "textarea" %}
       <textarea
         id="{{ name }}"
         name="{{ name }}"
         rows="{{ rows }}"
         placeholder="{{ placeholder }}"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors py-2.5 px-3 border placeholder-slate-400"
         {% if required %}required{% endif %}
       >{{ value }}</textarea>
     {% else %}
@@ -36,7 +37,7 @@
         name="{{ name }}"
         value="{{ value }}"
         placeholder="{{ placeholder }}"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors py-2.5 px-3 border placeholder-slate-400"
         {% if required %}required{% endif %}
       />
     {% endif %}
@@ -44,8 +45,8 @@
 {% endmacro %}
 
 {% macro tone_badge(tone) %}
-  {% set tone_color = 'bg-green-100 text-green-800' if tone == 'formal' else 'bg-blue-100 text-blue-800' if tone == 'casual' else 'bg-amber-100 text-amber-800' if tone == 'urgent' else 'bg-purple-100 text-purple-800' %}
-  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ tone_color }}">
+  {% set tone_color = 'bg-emerald-100 text-emerald-800 border-emerald-200' if tone == 'formal' else 'bg-sky-100 text-sky-800 border-sky-200' if tone == 'casual' else 'bg-rose-100 text-rose-800 border-rose-200' if tone == 'urgent' else 'bg-violet-100 text-violet-800 border-violet-200' %}
+  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ tone_color }}">
     {{ tone | title }}
   </span>
 {% endmacro %}

@@ -4,12 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}MailCraft{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
   </head>
-  <body class="bg-gray-50 text-gray-900 min-h-screen">
+  <body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans selection:bg-indigo-100 selection:text-indigo-900">
     {% include "components/navbar.html" %}
-    <main class="max-w-3xl mx-auto px-4 py-8">
+    <main class="flex-grow w-full max-w-5xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
       {% block content %}{% endblock %}
     </main>
+    {% include "components/footer.html" %}
   </body>
 </html>

@@ -4,104 +4,141 @@
 {% block title %}Generate Email — MailCraft{% endblock %}
 
 {% block content %}
-<section class="space-y-6">
-  <div>
-    <h1 class="text-2xl font-bold text-gray-900">Generate Email</h1>
-    <p class="mt-2 text-gray-600">
-      Enter your intent, key facts, and tone to generate a professional email.
-    </p>
+<div class="mb-8">
+  <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Draft an Email</h1>
+  <p class="mt-2 text-slate-600 text-lg">
+    Provide the context and let the AI write the perfect email for you.
+  </p>
+</div>
+
+{% include "components/flash.html" %}
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+  <!-- Form Section -->
+  <div class="lg:col-span-5 space-y-6">
+    {% call ui.card(extra_class="sticky top-24") %}
+      <form method="post" action="/generate" class="space-y-5">
+        {{ ui.form_field("Intent", "intent", field_type="textarea", value=form.intent, placeholder="e.g., Follow up after the product demo", rows=3) }}
+
+        <div class="space-y-2">
+          <label class="block text-sm font-semibold text-slate-700">Key Facts</label>
+          <p class="text-xs text-slate-500 mb-2">These will be seamlessly integrated into the email.</p>
+          <div id="facts-container" class="space-y-2.5">
+            {% for fact in form.key_facts %}
+              <div class="flex items-center gap-2">
+                <div class="flex-shrink-0 text-slate-400">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"></circle></svg>
+                </div>
+                <input
+                  type="text"
+                  name="key_facts"
+                  value="{{ fact }}"
+                  placeholder="e.g., Meeting was on May 12"
+                  class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border placeholder-slate-400"
+                  required
+                />
+              </div>
+            {% else %}
+              <div class="flex items-center gap-2">
+                <div class="flex-shrink-0 text-slate-400">
+                  <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"></circle></svg>
+                </div>
+                <input
+                  type="text"
+                  name="key_facts"
+                  placeholder="e.g., Meeting was on May 12"
+                  class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border placeholder-slate-400"
+                  required
+                />
+              </div>
+            {% endfor %}
+          </div>
+          <button
+            type="button"
+            id="add-fact"
+            class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center gap-1 transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+            Add another fact
+          </button>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="tone" class="block text-sm font-semibold text-slate-700">Tone</label>
+          <select
+            id="tone"
+            name="tone"
+            class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border bg-white"
+            required
+          >
+            {% for option in tone_options %}
+              <option value="{{ option }}" {% if form.tone == option %}selected{% endif %}>
+                {{ option | title }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <label for="strategy" class="block text-sm font-semibold text-slate-700">Strategy</label>
+          <select
+            id="strategy"
+            name="strategy"
+            class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border bg-white"
+          >
+            <option value="strategy_a" {% if form.strategy == "strategy_a" %}selected{% endif %}>
+              Strategy A (Role-Playing + Few-Shot)
+            </option>
+            <option value="strategy_b" {% if form.strategy == "strategy_b" %}selected{% endif %}>
+              Strategy B (Zero-shot baseline)
+            </option>
+          </select>
+        </div>
+
+        <div class="pt-2">
+          {{ ui.button("Generate Email", extra_class="w-full") }}
+        </div>
+      </form>
+    {% endcall %}
   </div>
 
-  {% include "components/flash.html" %}
-
-  <form method="post" action="/generate" class="space-y-4">
-    {{ ui.form_field("Intent", "intent", field_type="textarea", value=form.intent, placeholder="What is the purpose of this email?", rows=3) }}
-
-    <div class="space-y-2">
-      <label class="text-sm font-medium text-gray-700">Key Facts</label>
-      <p class="text-xs text-gray-500">All facts must appear in the generated email.</p>
-      <div id="facts-container" class="space-y-2">
-        {% for fact in form.key_facts %}
-          <input
-            type="text"
-            name="key_facts"
-            value="{{ fact }}"
-            placeholder="Enter a key fact"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            required
-          />
-        {% else %}
-          <input
-            type="text"
-            name="key_facts"
-            placeholder="Enter a key fact"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            required
-          />
-        {% endfor %}
-      </div>
-      <button
-        type="button"
-        id="add-fact"
-        class="text-sm text-blue-600 hover:text-blue-800 font-medium"
-      >
-        + Add another fact
-      </button>
-    </div>
-
-    <div class="space-y-1">
-      <label for="tone" class="text-sm font-medium text-gray-700">Tone</label>
-      <select
-        id="tone"
-        name="tone"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        required
-      >
-        {% for option in tone_options %}
-          <option value="{{ option }}" {% if form.tone == option %}selected{% endif %}>
-            {{ option | title }}
-          </option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <div class="space-y-1">
-      <label for="strategy" class="text-sm font-medium text-gray-700">Strategy</label>
-      <select
-        id="strategy"
-        name="strategy"
-        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      >
-        <option value="strategy_a" {% if form.strategy == "strategy_a" %}selected{% endif %}>
-          Strategy A (Role-Playing + Few-Shot)
-        </option>
-        <option value="strategy_b" {% if form.strategy == "strategy_b" %}selected{% endif %}>
-          Strategy B (Zero-shot baseline)
-        </option>
-      </select>
-    </div>
-
-    {{ ui.button("Generate Email") }}
-  </form>
-
-  {% if email_result %}
-    {% call ui.card("Preview") %}
+  <!-- Preview Section -->
+  <div class="lg:col-span-7">
+    {% if email_result %}
       {% include "components/email_preview.html" %}
-    {% endcall %}
-  {% endif %}
-</section>
+    {% else %}
+      <div class="h-full min-h-[400px] rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 p-8 text-center">
+        <svg class="w-12 h-12 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <p class="text-lg font-medium text-slate-500">Your generated email will appear here.</p>
+        <p class="text-sm mt-1">Fill out the form on the left to get started.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
 
 <script>
   document.getElementById("add-fact")?.addEventListener("click", () => {
     const container = document.getElementById("facts-container");
+    
+    const wrapper = document.createElement("div");
+    wrapper.className = "flex items-center gap-2";
+    
+    const iconDiv = document.createElement("div");
+    iconDiv.className = "flex-shrink-0 text-slate-400";
+    iconDiv.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"></circle></svg>';
+    
     const input = document.createElement("input");
     input.type = "text";
     input.name = "key_facts";
-    input.placeholder = "Enter a key fact";
+    input.placeholder = "Enter another key fact";
     input.className =
-      "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
+      "block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border placeholder-slate-400";
     input.required = true;
-    container.appendChild(input);
+    
+    wrapper.appendChild(iconDiv);
+    wrapper.appendChild(input);
+    container.appendChild(wrapper);
+    
     input.focus();
   });
 </script>
