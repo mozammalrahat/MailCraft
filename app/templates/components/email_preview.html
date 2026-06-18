@@ -1,0 +1,32 @@
+{% import "components/ui.html" as ui %}
+
+{% if email_result %}
+  <div class="space-y-4">
+    <div class="flex items-center justify-between">
+      <h3 class="text-base font-semibold text-gray-900">Generated Email</h3>
+      <div class="flex items-center gap-2">
+        {{ ui.tone_badge(email_result.tone) }}
+        <span class="text-xs text-gray-500">{{ email_result.strategy }}</span>
+      </div>
+    </div>
+
+    {% if email_result.subject %}
+      <p class="text-sm text-gray-600">
+        <span class="font-medium text-gray-700">Subject:</span> {{ email_result.subject }}
+      </p>
+    {% endif %}
+
+    <div
+      id="email-preview"
+      class="p-4 rounded-md bg-gray-50 border border-gray-200 whitespace-pre-wrap text-sm text-gray-800 leading-relaxed"
+    >{{ email_result.email }}</div>
+
+    <button
+      type="button"
+      onclick="navigator.clipboard.writeText(document.getElementById('email-preview').innerText)"
+      class="px-3 py-1.5 text-sm rounded border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+    >
+      Copy to clipboard
+    </button>
+  </div>
+{% endif %}

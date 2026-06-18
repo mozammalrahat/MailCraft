@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% import "components/ui.html" as ui %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -11,10 +12,16 @@
     </p>
   </div>
 
-  <div class="p-6 rounded-lg shadow bg-white border border-gray-100">
-    <p class="text-sm text-gray-500">
-      Professional email generation system initialized. Advanced prompt engineering and evaluation metrics coming next.
+  {% call ui.card() %}
+    <p class="text-sm text-gray-600 mb-4">
+      Generate professional emails from intent, key facts, and tone using advanced prompt engineering.
     </p>
-  </div>
+    <a
+      href="/generate"
+      class="inline-flex px-4 py-2 text-white rounded font-medium bg-blue-600 hover:bg-blue-700 transition-colors"
+    >
+      Generate Email
+    </a>
+  {% endcall %}
 </section>
 {% endblock %}

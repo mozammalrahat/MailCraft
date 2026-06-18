@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% import "components/ui.html" as ui %}
+
+{% block title %}Generate Email — MailCraft{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+  <div>
+    <h1 class="text-2xl font-bold text-gray-900">Generate Email</h1>
+    <p class="mt-2 text-gray-600">
+      Enter your intent, key facts, and tone to generate a professional email.
+    </p>
+  </div>
+
+  {% include "components/flash.html" %}
+
+  <form method="post" action="/generate" class="space-y-4">
+    {{ ui.form_field("Intent", "intent", field_type="textarea", value=form.intent, placeholder="What is the purpose of this email?", rows=3) }}
+
+    <div class="space-y-2">
+      <label class="text-sm font-medium text-gray-700">Key Facts</label>
+      <p class="text-xs text-gray-500">All facts must appear in the generated email.</p>
+      <div id="facts-container" class="space-y-2">
+        {% for fact in form.key_facts %}
+          <input
+            type="text"
+            name="key_facts"
+            value="{{ fact }}"
+            placeholder="Enter a key fact"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            required
+          />
+        {% else %}
+          <input
+            type="text"
+            name="key_facts"
+            placeholder="Enter a key fact"
+            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            required
+          />
+        {% endfor %}
+      </div>
+      <button
+        type="button"
+        id="add-fact"
+        class="text-sm text-blue-600 hover:text-blue-800 font-medium"
+      >
+        + Add another fact
+      </button>
+    </div>
+
+    <div class="space-y-1">
+      <label for="tone" class="text-sm font-medium text-gray-700">Tone</label>
+      <select
+        id="tone"
+        name="tone"
+        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        required
+      >
+        {% for option in tone_options %}
+          <option value="{{ option }}" {% if form.tone == option %}selected{% endif %}>
+            {{ option | title }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="space-y-1">
+      <label for="strategy" class="text-sm font-medium text-gray-700">Strategy</label>
+      <select
+        id="strategy"
+        name="strategy"
+        class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      >
+        <option value="strategy_a" {% if form.strategy == "strategy_a" %}selected{% endif %}>
+          Strategy A (Role-Playing + Few-Shot)
+        </option>
+        <option value="strategy_b" {% if form.strategy == "strategy_b" %}selected{% endif %}>
+          Strategy B (Zero-shot baseline)
+        </option>
+      </select>
+    </div>
+
+    {{ ui.button("Generate Email") }}
+  </form>
+
+  {% if email_result %}
+    {% call ui.card("Preview") %}
+      {% include "components/email_preview.html" %}
+    {% endcall %}
+  {% endif %}
+</section>
+
+<script>
+  document.getElementById("add-fact")?.addEventListener("click", () => {
+    const container = document.getElementById("facts-container");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.name = "key_facts";
+    input.placeholder = "Enter a key fact";
+    input.className =
+      "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500";
+    input.required = true;
+    container.appendChild(input);
+    input.focus();
+  });
+</script>
+{% endblock %}
