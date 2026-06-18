@@ -1,0 +1,1 @@
+"""MailCraft test suite."""
