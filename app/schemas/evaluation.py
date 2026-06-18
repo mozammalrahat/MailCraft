@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 from app.schemas.email import EmailTone
+from app.services.evaluation.metrics.base import MetricDefinition
 
 
 class Scenario(BaseModel):
@@ -17,3 +20,30 @@ class ScenarioCollection(BaseModel):
     @property
     def count(self) -> int:
         return len(self.scenarios)
+
+
+class ScenarioScore(BaseModel):
+    scenario_id: str
+    scores: dict[str, float]
+    generated_email: str
+
+
+class StrategyResult(BaseModel):
+    model: str
+    scenarios: list[ScenarioScore]
+    averages: dict[str, float]
+
+
+class EvaluationMetadata(BaseModel):
+    generated_at: datetime
+    metrics: list[MetricDefinition]
+
+
+class EvaluationSummary(BaseModel):
+    overall_average: float
+
+
+class EvaluationReport(BaseModel):
+    metadata: EvaluationMetadata
+    strategies: dict[str, StrategyResult]
+    summary: EvaluationSummary
