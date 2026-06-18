@@ -1,0 +1,16 @@
+Rate how well the generated email matches the requested tone on a scale of 1-5.
+
+Requested tone: {{ tone }}
+
+Tone rubric:
+- formal: professional language, structured greeting/sign-off, no slang
+- casual: conversational, friendly, relaxed phrasing
+- urgent: clear time sensitivity, direct call to action, priority language
+- empathetic: acknowledges feelings, sincere tone, supportive language
+
+Generated email:
+{{ generated_email }}
+
+Respond in this exact format:
+SCORE: <integer 1-5>
+JUSTIFICATION: <one sentence explaining the score>
