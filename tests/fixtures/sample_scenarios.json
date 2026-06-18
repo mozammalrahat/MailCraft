@@ -1,0 +1,24 @@
+{
+  "scenarios": [
+    {
+      "id": "s01",
+      "intent": "Follow up after product demo",
+      "key_facts": [
+        "Demo held on May 12",
+        "Prospect requested pricing for 50 seats"
+      ],
+      "tone": "formal",
+      "reference_email": "Subject: Follow-Up on May 12 Product Demo\n\nDear Ms. Chen,\n\nThank you for attending our product demonstration on May 12. As discussed, I have attached pricing for 50 seats for your review.\n\nBest regards,\nAlex Rivera"
+    },
+    {
+      "id": "s02",
+      "intent": "Share sprint progress with the engineering team",
+      "key_facts": [
+        "Sprint ends Friday",
+        "API migration is 80% complete"
+      ],
+      "tone": "casual",
+      "reference_email": "Subject: Quick Sprint Update\n\nHi team,\n\nSprint ends Friday and the API migration is about 80% complete. Let me know if you have blockers.\n\nThanks,\nJordan"
+    }
+  ]
+}

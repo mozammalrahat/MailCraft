@@ -1,0 +1,114 @@
+{
+  "scenarios": [
+    {
+      "id": "s01",
+      "intent": "Follow up after product demo",
+      "key_facts": [
+        "Demo held on May 12",
+        "Prospect requested pricing for 50 seats",
+        "Next step is legal review"
+      ],
+      "tone": "formal",
+      "reference_email": "Subject: Follow-Up on May 12 Product Demo\n\nDear Ms. Chen,\n\nThank you for taking the time to attend our product demonstration on May 12. I appreciated the opportunity to walk your team through our platform capabilities and address your questions regarding enterprise deployment.\n\nAs discussed during the session, I have prepared pricing details for 50 seats and attached the proposal for your review. Please share it with your procurement and legal teams at your convenience.\n\nOur agreed next step is to coordinate a legal review of the standard agreement. I am happy to provide any additional security documentation or references your counsel may require.\n\nPlease let me know if you would like to schedule a brief call to discuss timeline or implementation planning.\n\nBest regards,\nAlex Rivera\nSenior Account Executive"
+    },
+    {
+      "id": "s02",
+      "intent": "Share sprint progress with the engineering team",
+      "key_facts": [
+        "Sprint ends Friday",
+        "API migration is 80% complete",
+        "Design review moved to Thursday"
+      ],
+      "tone": "casual",
+      "reference_email": "Subject: Quick Sprint Update\n\nHi team,\n\nWanted to drop a quick update before we wrap sprint on Friday.\n\nGood news on the API migration — we're about 80% complete. Most endpoints are migrated, and we're down to the billing webhooks and a couple of admin routes. If you're picking up a remaining ticket, ping me in #api-migration so we don't duplicate work.\n\nHeads-up: the design review has been moved to Thursday at 2 PM. Same room, same attendees — just a day earlier so we can lock UI decisions before code freeze.\n\nLet me know if you have blockers before Friday. Otherwise, let's push to close out the sprint strong.\n\nThanks,\nJordan"
+    },
+    {
+      "id": "s03",
+      "intent": "Remind client about contract signature deadline",
+      "key_facts": [
+        "Contract must be signed by June 30",
+        "Onboarding starts July 8",
+        "Legal contact is patricia.lee@acmecorp.com"
+      ],
+      "tone": "urgent",
+      "reference_email": "Subject: Action Required: Contract Signature Due June 30\n\nDear Mr. Thompson,\n\nI am writing to confirm that your service agreement must be signed by June 30 to secure your onboarding start date of July 8. Without a signed contract by the deadline, we may need to reschedule your implementation window.\n\nIf your team has outstanding legal questions, please route them to Patricia Lee at patricia.lee@acmecorp.com so we can resolve them immediately.\n\nI have reattached the agreement for convenience. Kindly return the executed copy at your earliest opportunity, or reply to confirm if additional time is required.\n\nThank you for your prompt attention to this matter.\n\nSincerely,\nMorgan Blake\nCustomer Success Manager"
+    },
+    {
+      "id": "s04",
+      "intent": "Apologize for delayed project delivery",
+      "key_facts": [
+        "Delivery delayed by two weeks",
+        "Root cause was a third-party API outage",
+        "Revised delivery date is August 14"
+      ],
+      "tone": "empathetic",
+      "reference_email": "Subject: Update on Project Timeline\n\nDear Ms. Okonkwo,\n\nI want to sincerely apologize for the delay in delivering your project. I understand how disruptive timeline changes can be for your team, and I take full responsibility for keeping you informed.\n\nThe delivery has been delayed by two weeks due to a third-party API outage that affected our integration testing window. While we cannot control external provider stability, we should have communicated the risk sooner.\n\nWe have completed a recovery plan, and the revised delivery date is August 14. I will send weekly progress updates every Monday until launch and remain available for any questions.\n\nThank you for your patience and partnership as we work to deliver a stable solution.\n\nWarm regards,\nElena Vasquez\nProject Lead"
+    },
+    {
+      "id": "s05",
+      "intent": "Prospect outreach for analytics platform",
+      "key_facts": [
+        "Company recently raised Series B funding",
+        "Platform reduces reporting time by 40%",
+        "Offer a 30-minute discovery call next week"
+      ],
+      "tone": "formal",
+      "reference_email": "Subject: Congratulations on Series B — Analytics Efficiency Opportunity\n\nDear Dr. Patel,\n\nCongratulations to you and the team on your recent Series B funding. As you scale operations, timely reporting often becomes a growing challenge for finance and operations leaders.\n\nOur analytics platform has helped similar growth-stage companies reduce reporting time by 40%, enabling faster executive decisions without adding headcount.\n\nI would welcome the opportunity to learn about your current reporting workflow and share relevant benchmarks from companies in your sector. I am available for a 30-minute discovery call next week at a time that suits your schedule.\n\nPlease let me know your preferred day, and I will send a calendar invite.\n\nBest regards,\nSamuel Grant\nEnterprise Sales, North America"
+    },
+    {
+      "id": "s06",
+      "intent": "Request a meeting to discuss Q3 roadmap",
+      "key_facts": [
+        "Proposed meeting date is July 10 at 11:00 AM ET",
+        "Attendees include product, engineering, and customer success",
+        "Meeting duration is 45 minutes"
+      ],
+      "tone": "formal",
+      "reference_email": "Subject: Meeting Request — Q3 Roadmap Alignment\n\nDear Ms. Alvarez,\n\nI would like to schedule a meeting to discuss our Q3 roadmap and ensure alignment across product, engineering, and customer success priorities.\n\nI propose July 10 at 11:00 AM ET for a 45-minute session. Attendees would include representatives from product, engineering, and customer success, as well as your team leads.\n\nThe agenda will cover key deliverables, dependency risks, and customer commitments for the quarter. Please let me know if the proposed time works or suggest an alternative that accommodates your calendar.\n\nI will circulate a draft agenda once the meeting is confirmed.\n\nKind regards,\nRina Kapoor\nDirector of Product Operations"
+    },
+    {
+      "id": "s07",
+      "intent": "Send proposal submission cover email",
+      "key_facts": [
+        "Proposal submitted for RFP #2024-118",
+        "Total project cost is $285,000",
+        "Implementation timeline is 12 weeks"
+      ],
+      "tone": "formal",
+      "reference_email": "Subject: Proposal Submission — RFP #2024-118\n\nDear Members of the Evaluation Committee,\n\nPlease find attached our proposal in response to RFP #2024-118. We appreciate the opportunity to compete for this engagement and have structured our response to meet the requirements outlined in your solicitation.\n\nThe total project cost is $285,000, inclusive of implementation, training, and first-year support. Our proposed implementation timeline is 12 weeks from contract execution, with milestone-based deliverables at weeks 4, 8, and 12.\n\nShould you require clarifications or additional references, I am available to support your review process. Thank you for your consideration.\n\nRespectfully,\nDaniel Cho\nProposal Manager"
+    },
+    {
+      "id": "s08",
+      "intent": "Provide monthly status update to executive stakeholder",
+      "key_facts": [
+        "Project is 65% complete",
+        "Budget utilization is at 58%",
+        "Top risk is vendor staffing availability in August"
+      ],
+      "tone": "formal",
+      "reference_email": "Subject: Monthly Status Update — Transformation Program\n\nDear Mr. Hughes,\n\nPlease find below the monthly status update for the Transformation Program as of the June reporting period.\n\nOverall progress stands at 65% complete against the approved plan. Budget utilization is at 58%, which remains within forecast and reflects disciplined scope management.\n\nThe top risk this month is vendor staffing availability in August, which may affect two integration workstreams. Mitigation actions include pre-confirming named resources and establishing a backup vendor bench by July 15.\n\nNo executive decisions are required at this time. I will highlight any material changes in the July update.\n\nRegards,\nNatalie Brooks\nProgram Manager"
+    },
+    {
+      "id": "s09",
+      "intent": "Thank candidate after final interview",
+      "key_facts": [
+        "Interview held on Tuesday",
+        "Hiring decision expected within one week",
+        "Candidate should contact HR with any follow-up questions"
+      ],
+      "tone": "empathetic",
+      "reference_email": "Subject: Thank You for Interviewing with MailCraft\n\nDear Mr. Lewis,\n\nThank you for taking the time to interview with us on Tuesday. We enjoyed learning more about your experience and discussing how you approach collaborative product delivery.\n\nOur hiring decision is expected within one week. Regardless of the outcome, we sincerely appreciate the thoughtfulness you brought to each conversation.\n\nIf you have any follow-up questions in the meantime, please contact our HR team and they will be glad to assist.\n\nWishing you all the best,\nHannah Wright\nTalent Acquisition Partner"
+    },
+    {
+      "id": "s10",
+      "intent": "Escalate unresolved support ticket to vendor",
+      "key_facts": [
+        "Ticket #SUP-4421 open for 9 days",
+        "Issue blocks production invoice processing",
+        "Require response within 24 hours"
+      ],
+      "tone": "urgent",
+      "reference_email": "Subject: Escalation — Ticket #SUP-4421 (Production Impact)\n\nDear Vendor Support Leadership,\n\nI am escalating ticket #SUP-4421, which has remained open for 9 days without resolution. The issue currently blocks production invoice processing and is affecting daily financial close activities.\n\nWe require a response within 24 hours confirming assigned engineering resources, root-cause analysis, and an estimated time to resolution. Please treat this as a severity-1 production incident.\n\nOur operations team is available for a bridge call at your earliest convenience to accelerate troubleshooting.\n\nRegards,\nChris Mendez\nIT Operations Manager"
+    }
+  ]
+}
