@@ -23,8 +23,6 @@ def _parse_email_output(raw: str) -> tuple[str | None, str]:
 
 
 def _format_email(subject: str | None, body: str) -> str:
-    if subject:
-        return f"Subject: {subject}\n\n{body}"
     return body
 
 

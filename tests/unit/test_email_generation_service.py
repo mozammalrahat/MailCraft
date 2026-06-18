@@ -27,7 +27,7 @@ async def test_generate_email_returns_structured_response() -> None:
 
     result = await generate_email(_sample_request(), mock_client, settings)
 
-    assert "Proposal Follow-Up" in result.email
+    assert "proposal sent on Monday" in result.email
     assert result.subject == "Proposal Follow-Up"
     assert result.strategy == "strategy_a"
     assert result.prompt_version == "2.0.0"

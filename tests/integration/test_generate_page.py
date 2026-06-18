@@ -33,7 +33,7 @@ def test_generate_page_post_success(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert "Sprint Update" in response.text
-    assert "New Message" in response.text
+    assert "Generated Email" in response.text
 
 
 def test_generate_page_post_validation_error(client: TestClient) -> None:
