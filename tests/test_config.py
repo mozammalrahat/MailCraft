@@ -17,8 +17,6 @@ def test_settings_strategies_use_env_models() -> None:
     strategies = settings.strategies
     assert strategies["strategy_a"].model == "gemini-2.5-flash"
     assert strategies["strategy_b"].model == "gemini-2.5-flash-lite"
-    assert strategies["strategy_a"].template == "strategy_a.jinja"
-    assert strategies["strategy_b"].template == "strategy_b.jinja"
 
 
 def test_settings_env_override(monkeypatch) -> None:

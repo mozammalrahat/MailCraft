@@ -1,33 +1,21 @@
-from pathlib import Path
-
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-
 from app.schemas.email import EmailGenerationRequest
+from app.services.prompts import PROMPT_BUILDERS
 
-PROMPTS_DIR = Path(__file__).resolve().parents[2] / "prompts"
-PROMPT_VERSION = "1.0.0"
+PROMPT_VERSION = "2.0.0"
 
-SUPPORTED_STRATEGIES = frozenset({"strategy_a", "strategy_b"})
-
-_jinja_env = Environment(
-    loader=FileSystemLoader(PROMPTS_DIR),
-    autoescape=select_autoescape(default=False),
-    trim_blocks=True,
-    lstrip_blocks=True,
-)
+SUPPORTED_STRATEGIES = frozenset(PROMPT_BUILDERS.keys())
 
 
 def build_prompt(request: EmailGenerationRequest, strategy: str = "strategy_a") -> str:
-    if strategy not in SUPPORTED_STRATEGIES:
+    builder = PROMPT_BUILDERS.get(strategy)
+    if builder is None:
         msg = f"Unsupported strategy: {strategy}"
         raise ValueError(msg)
 
-    template_name = f"{strategy}.jinja"
-    template = _jinja_env.get_template(template_name)
-    return template.render(
-        intent=request.intent,
-        key_facts=request.key_facts,
-        tone=request.tone,
+    return builder(
+        request.intent,
+        request.key_facts,
+        request.tone.value,
     )
 
 

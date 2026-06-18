@@ -6,6 +6,7 @@ from app.services.evaluation.metrics.base import (
     MetricScore,
 )
 from app.services.llm.client import LlmClient
+from app.services.prompts.judge_quality import build_quality_judge_prompt
 
 _SUBJECT_PATTERN = re.compile(r"^Subject:\s*.+$", re.MULTILINE | re.IGNORECASE)
 _GREETING_PATTERN = re.compile(
@@ -88,15 +89,7 @@ class ProfessionalQualityMetric:
     async def score(self, input_data: MetricInput) -> MetricScore:
         automated, automated_details = _automated_score(input_data.generated_email)
 
-        judge_prompt = (
-            "Rate the following business email on grammar, clarity, and opening "
-            "effectiveness using integers 1-5 for each dimension.\n\n"
-            f"Email:\n{input_data.generated_email}\n\n"
-            "Respond exactly as:\n"
-            "GRAMMAR: <1-5>\n"
-            "CLARITY: <1-5>\n"
-            "OPENING: <1-5>"
-        )
+        judge_prompt = build_quality_judge_prompt(input_data.generated_email)
         raw = await self._llm_client.generate_content(judge_prompt)
         judge_value, judge_details = _parse_quality_judge(raw)
 

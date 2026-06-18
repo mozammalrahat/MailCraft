@@ -43,8 +43,8 @@ def test_strategy_a_includes_few_shot_examples() -> None:
     prompt = build_prompt(request, strategy="strategy_a")
 
     assert "Example 1" in prompt
-    assert "Example 2" in prompt
-    assert "senior B2B email copywriter" in prompt
+    assert "Example 4" in prompt
+    assert "professional email composer" in prompt
 
 
 def test_strategy_b_is_zero_shot_baseline() -> None:
@@ -55,6 +55,7 @@ def test_strategy_b_is_zero_shot_baseline() -> None:
 
     assert "Example 1" not in prompt
     assert "senior B2B email copywriter" not in prompt
+    assert "professional email composer" not in prompt
 
 
 def test_unsupported_strategy_raises() -> None:

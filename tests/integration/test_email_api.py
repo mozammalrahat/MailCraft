@@ -27,7 +27,7 @@ def test_generate_email_api_success(client: TestClient) -> None:
     assert data["email"]
     assert data["subject"] == "Demo Follow-Up"
     assert data["strategy"] == "strategy_a"
-    assert data["prompt_version"] == "1.0.0"
+    assert data["prompt_version"] == "2.0.0"
     assert data["model"]
 
 

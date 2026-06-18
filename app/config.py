@@ -7,7 +7,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class StrategyConfig(BaseModel):
     name: str
     model: str
-    template: str
 
 
 class Settings(BaseSettings):
@@ -32,12 +31,10 @@ class Settings(BaseSettings):
             "strategy_a": StrategyConfig(
                 name="strategy_a",
                 model=self.google_model_a,
-                template="strategy_a.jinja",
             ),
             "strategy_b": StrategyConfig(
                 name="strategy_b",
                 model=self.google_model_b,
-                template="strategy_b.jinja",
             ),
         }
 

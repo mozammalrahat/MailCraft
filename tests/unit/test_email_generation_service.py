@@ -30,7 +30,7 @@ async def test_generate_email_returns_structured_response() -> None:
     assert "Proposal Follow-Up" in result.email
     assert result.subject == "Proposal Follow-Up"
     assert result.strategy == "strategy_a"
-    assert result.prompt_version == "1.0.0"
+    assert result.prompt_version == "2.0.0"
     mock_client.generate_content.assert_awaited_once()
 
 

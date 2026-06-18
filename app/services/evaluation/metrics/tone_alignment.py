@@ -1,7 +1,4 @@
 import re
-from pathlib import Path
-
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from app.services.evaluation.metrics.base import (
     MetricDefinition,
@@ -9,14 +6,7 @@ from app.services.evaluation.metrics.base import (
     MetricScore,
 )
 from app.services.llm.client import LlmClient
-
-PROMPTS_DIR = Path(__file__).resolve().parents[3] / "prompts"
-_jinja_env = Environment(
-    loader=FileSystemLoader(PROMPTS_DIR),
-    autoescape=select_autoescape(default=False),
-    trim_blocks=True,
-    lstrip_blocks=True,
-)
+from app.services.prompts.judge_tone import build_tone_judge_prompt
 
 _SCORE_PATTERN = re.compile(r"SCORE:\s*(\d+)", re.IGNORECASE)
 _JUSTIFICATION_PATTERN = re.compile(r"JUSTIFICATION:\s*(.+)", re.IGNORECASE | re.DOTALL)
@@ -61,8 +51,7 @@ class ToneAlignmentMetric:
         )
 
     async def score(self, input_data: MetricInput) -> MetricScore:
-        template = _jinja_env.get_template("judge_tone.jinja")
-        prompt = template.render(
+        prompt = build_tone_judge_prompt(
             tone=input_data.tone,
             generated_email=input_data.generated_email,
         )
