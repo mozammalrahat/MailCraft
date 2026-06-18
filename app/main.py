@@ -10,6 +10,7 @@ from app.config import get_settings
 from app.exceptions import register_exception_handlers
 from app.logging_config import configure_logging
 from app.middleware.request_logging import RequestLoggingMiddleware
+from app.routers.api.email import router as email_router
 from app.routers.api.health import router as health_router
 from app.routers.pages import router as pages_router
 
@@ -34,6 +35,7 @@ def create_app() -> FastAPI:
         app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     app.include_router(health_router, prefix="/api")
+    app.include_router(email_router, prefix="/api")
     app.include_router(pages_router)
 
     return app
