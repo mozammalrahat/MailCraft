@@ -2,7 +2,7 @@
   "generated_at": "2026-06-19T12:00:00+00:00",
   "strategies": {
     "strategy_a": {
-      "model": "gemini-2.0-flash",
+      "model": "gemini-2.5-flash",
       "averages": {
         "fact_recall": 0.87,
         "tone_alignment": 0.82,
@@ -10,7 +10,7 @@
       }
     },
     "strategy_b": {
-      "model": "gemini-2.0-flash",
+      "model": "gemini-2.5-flash",
       "averages": {
         "fact_recall": 0.72,
         "tone_alignment": 0.74,

@@ -22,7 +22,7 @@ class LlmClient:
         return self._client
 
     async def generate_content(self, prompt: str, *, model: str | None = None) -> str:
-        resolved_model = model or self._settings.google_model
+        resolved_model = model or self._settings.google_judge_model
         client = self._get_client()
 
         try:

@@ -94,7 +94,7 @@ async def test_run_full_evaluation_builds_report() -> None:
 
         mock_run.side_effect = [
             StrategyResult(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash",
                 scenarios=[
                     ScenarioScore(
                         scenario_id="s01",
@@ -113,7 +113,7 @@ async def test_run_full_evaluation_builds_report() -> None:
                 },
             ),
             StrategyResult(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash",
                 scenarios=[
                     ScenarioScore(
                         scenario_id="s01",
@@ -168,7 +168,7 @@ def test_write_all_reports(tmp_path) -> None:
         ),
         strategies={
             "strategy_a": StrategyResult(
-                model="gemini-2.0-flash",
+                model="gemini-2.5-flash",
                 scenarios=[
                     ScenarioScore(
                         scenario_id="s01",
