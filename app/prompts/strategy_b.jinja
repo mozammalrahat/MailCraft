@@ -1,0 +1,12 @@
+Write a professional email based on the following inputs.
+
+Intent: {{ intent }}
+
+Key Facts (must all appear in the email):
+{% for fact in key_facts %}
+- {{ fact }}
+{% endfor %}
+
+Tone: {{ tone }}
+
+Include a subject line followed by the email body. Do not invent facts beyond what is provided.
