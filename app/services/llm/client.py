@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from google import genai
@@ -10,8 +11,18 @@ logger = logging.getLogger(__name__)
 
 
 class LlmClient:
-    def __init__(self, settings: Settings) -> None:
+    def __init__(
+        self,
+        settings: Settings,
+        *,
+        request_delay_seconds: float | None = None,
+    ) -> None:
         self._settings = settings
+        self._request_delay_seconds = (
+            request_delay_seconds
+            if request_delay_seconds is not None
+            else settings.llm_request_delay_seconds
+        )
         self._client: genai.Client | None = None
 
     def _get_client(self) -> genai.Client:
@@ -36,6 +47,13 @@ class LlmClient:
                 extra={"model": resolved_model, "status_code": exc.code},
             )
             raise LlmError(f"LLM request failed: {exc.message}") from exc
+
+        if self._request_delay_seconds > 0:
+            logger.debug(
+                "Throttling LLM request; sleeping %.1fs",
+                self._request_delay_seconds,
+            )
+            await asyncio.sleep(self._request_delay_seconds)
 
         text = response.text
         if text is None:

@@ -9,6 +9,8 @@ from app.services.evaluation.report_writer import write_all_reports
 from app.services.evaluation.runner import run_full_evaluation
 from app.services.llm.client import LlmClient
 
+_EVAL_DEFAULT_REQUEST_DELAY_SECONDS = 20
+
 
 async def _async_main() -> int:
     settings = get_settings()
@@ -20,8 +22,16 @@ async def _async_main() -> int:
         )
         return 1
 
-    llm_client = LlmClient(settings)
-    logging.info("Starting evaluation run")
+    request_delay = (
+        settings.llm_request_delay_seconds
+        if settings.llm_request_delay_seconds > 0
+        else _EVAL_DEFAULT_REQUEST_DELAY_SECONDS
+    )
+    llm_client = LlmClient(settings, request_delay_seconds=request_delay)
+    logging.info(
+        "Starting evaluation run (%.1fs delay between LLM requests)",
+        request_delay,
+    )
 
     report = await run_full_evaluation(llm_client, settings)
     written = write_all_reports(report)

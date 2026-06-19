@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     google_model_a: str = Field(validation_alias="GOOGLE_MODEL_A")
     google_model_b: str = Field(validation_alias="GOOGLE_MODEL_B")
     google_judge_model: str = Field(validation_alias="GOOGLE_JUDGE_MODEL")
+    llm_request_delay_seconds: float = Field(
+        default=0.0,
+        validation_alias="LLM_REQUEST_DELAY_SECONDS",
+    )
 
     @property
     def strategies(self) -> dict[str, StrategyConfig]:
