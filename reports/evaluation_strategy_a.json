@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "generated_at": "2026-06-19T00:45:09.641343Z",
+    "metrics": [
+      {
+        "name": "fact_recall",
+        "definition": "Measures how many required key facts appear in the generated email.",
+        "logic": "For each key fact, normalize text and compute token overlap plus fuzzy substring similarity. A fact is matched when score >= 0.75. Score = matched_facts / total_facts.",
+        "technique": "automated"
+      },
+      {
+        "name": "tone_alignment",
+        "definition": "Measures how well the generated email matches the requested tone.",
+        "logic": "An LLM judge rates tone alignment 1-5 using a tone-specific rubric, then normalizes to 0.0-1.0 via (score - 1) / 4.",
+        "technique": "llm_judge"
+      },
+      {
+        "name": "professional_quality",
+        "definition": "Measures professional quality via conciseness, structure, and writing clarity.",
+        "logic": "40% automated: word-count penalty above 250 words, subject-line presence, greeting detection. 60% LLM judge: grammar, clarity, and opening effectiveness rated 1-5 and normalized.",
+        "technique": "hybrid"
+      }
+    ]
+  },
+  "strategies": {
+    "strategy_a": {
+      "model": "gemini-2.5-flash-lite",
+      "scenarios": [
+        {
+          "scenario_id": "s01",
+          "scores": {
+            "fact_recall": 0.6667,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear Mr./Ms. [Prospect Last Name],\n\nThank you for taking the time to attend our product demonstration on May 12. I am writing to follow up on our conversation and provide the requested information.\n\nAs per your inquiry during the session, I have prepared the pricing for 50 seats, which you will find attached to this email for your review. Our next logical step in moving forward is to conduct a legal review of the proposed agreement.\n\nPlease let me know your availability to discuss the next steps for the legal review process.\n\nBest regards,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s02",
+          "scores": {
+            "fact_recall": 0.6667,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.7333
+          },
+          "generated_email": "Hey team,\n\nJust a quick check-in on where we're at as the sprint wraps up on Friday.\n\nWe're making good progress on the API migration, sitting at about 80% complete. Also, heads up that the design review has been moved to Thursday.\n\nLet me know if you're hitting any unexpected blockers as we push to the finish line.\n\nThanks,\nJordan"
+        },
+        {
+          "scenario_id": "s03",
+          "scores": {
+            "fact_recall": 0.6667,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear Client,\n\nThis is an urgent reminder regarding your contract signature deadline. Securing your signature by June 30 is crucial for us to proceed.\n\nOur onboarding process is scheduled to begin on July 8, and this date is contingent upon the timely execution of the contract. Should your legal team have any questions regarding the agreement, please direct them to Patricia Lee at patricia.lee@acmecorp.com.\n\nPlease confirm once the signed contract has been submitted.\n\nSincerely,\nMorgan Blake"
+        },
+        {
+          "scenario_id": "s04",
+          "scores": {
+            "fact_recall": 1.0,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear Client,\n\nI'm writing to sincerely apologize for the delay in delivering your project. I understand that unexpected changes to timelines can be disruptive, and I regret any inconvenience this has caused.\n\nThe delivery has been delayed by two weeks. This was due to an unexpected third-party API outage that impacted our integration testing and required us to adjust our development schedule. We have now resolved the issue and have established a clear path forward. The revised delivery date for your project is August 14.\n\nI will be sending you weekly progress updates leading up to the August 14 delivery to ensure you are informed every step of the way. Please feel free to reach out if you have any immediate questions.\n\nWarm regards,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s05",
+          "scores": {
+            "fact_recall": 1.0,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear [Prospect Name],\n\nI am writing to introduce our analytics platform, designed to significantly improve data reporting efficiency. I understand your company has recently raised Series B funding, and we specialize in helping growing organizations like yours maximize their data insights.\n\nOur platform is proven to reduce reporting time by an average of 40%, freeing up valuable resources for strategic analysis rather than manual data compilation. This allows your team to make faster, more informed decisions.\n\nI would like to offer a brief 30-minute discovery call next week to discuss how our solution can be tailored to your specific needs. Please let me know your availability.\n\nBest regards,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s06",
+          "scores": {
+            "fact_recall": 0.6667,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear Colleagues,\n\nI am writing to formally request a meeting to discuss the upcoming Q3 roadmap. Aligning our strategic priorities for the next quarter is essential for our continued success.\n\nTo facilitate this discussion, I propose we convene on July 10 at 11:00 AM ET. This 45-minute session will include key representatives from product, engineering, and customer success to ensure comprehensive input and alignment.\n\nPlease confirm your availability for this proposed time, or suggest an alternative if this date presents a conflict.\n\nBest regards,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s07",
+          "scores": {
+            "fact_recall": 1.0,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear [Client Contact Name],\n\nThis email confirms the submission of our proposal in response to RFP #2024-118. We are pleased to present our comprehensive solution for your project requirements.\n\nThe total project cost outlined in our proposal is $285,000. We have also detailed an implementation timeline of 12 weeks, designed to deliver your project efficiently.\n\nWe look forward to discussing how our proposal aligns with your objectives. Please advise on your preferred method for a more detailed review.\n\nBest regards,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s08",
+          "scores": {
+            "fact_recall": 1.0,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear Executive Stakeholder,\n\nThis email provides the monthly status update for your review. The project is progressing well and is currently 65% complete.\n\nOur budget utilization stands at 58%, indicating efficient management of resources. The primary risk we are currently tracking is vendor staffing availability, particularly for August. We are proactively engaging with our vendors to mitigate any potential impacts.\n\nPlease let me know if you require further details or wish to discuss any aspect of the project status.\n\nBest regards,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s09",
+          "scores": {
+            "fact_recall": 0.3333,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear [Candidate Name],\n\nThank you for taking the time to speak with us again on Tuesday. We appreciate you sharing your insights and learning more about your experience.\n\nWe understand that the interview process can be a waiting game, and we want to assure you we are moving forward thoughtfully. Our hiring team is currently deliberating, and we expect to make a final decision within the next week.\n\nIn the meantime, should any questions arise that you would like to discuss, please feel free to reach out to our HR department.\n\nWe will be in touch again soon with an update on our decision.\n\nSincerely,\n[Your Name]"
+        },
+        {
+          "scenario_id": "s10",
+          "scores": {
+            "fact_recall": 1.0,
+            "tone_alignment": 1.0,
+            "professional_quality": 0.8667
+          },
+          "generated_email": "Dear Vendor Support Team,\n\nI am writing to escalate support ticket #SUP-4421. This ticket has been open for 9 days and is currently blocking our production invoice processing.\n\nThe continued delay in resolving this issue is impacting critical business operations. We require an immediate response and resolution plan.\n\nPlease provide a definitive update and estimated time to resolution within the next 24 hours.\n\nSincerely,\n[Your Name]"
+        }
+      ],
+      "averages": {
+        "fact_recall": 0.8,
+        "tone_alignment": 1.0,
+        "professional_quality": 0.8534
+      }
+    }
+  },
+  "summary": {
+    "overall_average": 0.8714
+  }
+}
