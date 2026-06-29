@@ -1,22 +1,24 @@
-from functools import lru_cache
+"""Backward-compatible FastAPI dependencies."""
+
 from typing import Annotated
 
-from fastapi import Depends, Request
+from fastapi import Depends
 
-from app.config import Settings, get_settings
-from app.services.llm.client import LlmClient
+from app.api.dependencies.large_language_model import (
+    LargeLanguageModelClientDependency,
+    get_large_language_model_client,
+)
+from app.core.configuration import Settings, get_settings
+from app.infrastructure.large_language_model.client import LlmClient
 
 SettingsDep = Annotated[Settings, Depends(get_settings)]
+LlmClientDep = LargeLanguageModelClientDependency
+LlmDep = LlmClientDep
 
 
-def get_request_id(request: Request) -> str:
-    return getattr(request.state, "request_id", "")
+def get_llm_client(settings: SettingsDep) -> LlmClient:
+    """Return shared language model client (backward-compatible)."""
+    return get_large_language_model_client(settings)
 
 
-@lru_cache
-def _get_llm_client_cached() -> LlmClient:
-    return LlmClient(get_settings())
-
-
-def get_llm_client(_: SettingsDep) -> LlmClient:
-    return _get_llm_client_cached()
+__all__ = ["get_llm_client", "get_settings", "LlmClientDep", "LlmDep", "SettingsDep"]

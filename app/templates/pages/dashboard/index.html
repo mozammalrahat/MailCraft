@@ -1,0 +1,210 @@
+{% extends "layouts/dashboard.html" %}
+{% block main_class %}max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8{% endblock %}
+{% block title %}Dashboard — MailCraft{% endblock %}
+
+{% block dashboard_content %}
+<div class="mb-8">
+  <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Document History</h1>
+  <p class="mt-2 text-slate-600">Track and export your generated emails and cover letters.</p>
+</div>
+
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-2xl border border-slate-200 p-4">
+    <p class="text-xs text-slate-500 uppercase font-semibold">Total</p>
+    <p class="text-2xl font-bold text-slate-900">{{ stats.total }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-4">
+    <p class="text-xs text-slate-500 uppercase font-semibold">Quick Emails</p>
+    <p class="text-2xl font-bold text-emerald-600">{{ stats.legacy_emails }}</p>
+  </div>
+  <div class="bg-white rounded-2xl border border-slate-200 p-4">
+    <p class="text-xs text-slate-500 uppercase font-semibold">App Documents</p>
+    <p class="text-2xl font-bold text-violet-600">{{ stats.application_documents }}</p>
+  </div>
+</div>
+
+<form method="get" action="/dashboard" class="mb-6 bg-white rounded-2xl border border-slate-200 p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
+  <div>
+    <label class="block text-xs font-semibold text-slate-500 mb-1">Kind</label>
+    <select name="generation_kind" class="block w-full rounded-lg border-slate-300 text-sm py-2 px-2 border bg-white">
+      <option value="">All</option>
+      {% for kind in generation_kinds %}
+      <option value="{{ kind }}" {% if filters.generation_kind == kind %}selected{% endif %}>
+        {% if kind == 'legacy_email' %}Legacy Email{% else %}Application Document{% endif %}
+      </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs font-semibold text-slate-500 mb-1">Purpose</label>
+    <select name="purpose" class="block w-full rounded-lg border-slate-300 text-sm py-2 px-2 border bg-white">
+      <option value="">All</option>
+      {% for p in purposes %}
+      <option value="{{ p }}" {% if filters.purpose == p %}selected{% endif %}>{{ p | title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs font-semibold text-slate-500 mb-1">Document Type</label>
+    <select name="document_type" class="block w-full rounded-lg border-slate-300 text-sm py-2 px-2 border bg-white">
+      <option value="">All</option>
+      {% for dt in document_types %}
+      <option value="{{ dt }}" {% if filters.document_type == dt %}selected{% endif %}>{{ dt.replace('_', ' ') | title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label class="block text-xs font-semibold text-slate-500 mb-1">Scenario</label>
+    <select name="scenario_id" class="block w-full rounded-lg border-slate-300 text-sm py-2 px-2 border bg-white">
+      <option value="">All</option>
+      {% for s in scenarios %}
+      <option value="{{ s.id }}" {% if filters.scenario_id == s.id %}selected{% endif %}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="sm:col-span-2 lg:col-span-1">
+    <label class="block text-xs font-semibold text-slate-500 mb-1">Search metadata</label>
+    <input type="search" name="q" value="{{ filters.q }}" placeholder="Organization, position…" class="block w-full rounded-lg border-slate-300 text-sm py-2 px-2 border" />
+  </div>
+  <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
+    <button type="submit" class="px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Filter</button>
+    <a href="/dashboard" class="px-4 py-2 text-sm font-medium rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50">Clear</a>
+  </div>
+</form>
+
+<div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-slate-50 border-b border-slate-200">
+        <tr>
+          <th class="px-4 py-3 text-left font-semibold text-slate-600">Date</th>
+          <th class="px-4 py-3 text-left font-semibold text-slate-600">Kind</th>
+          <th class="px-4 py-3 text-left font-semibold text-slate-600">Type</th>
+          <th class="px-4 py-3 text-left font-semibold text-slate-600">Purpose</th>
+          <th class="px-4 py-3 text-left font-semibold text-slate-600 hidden md:table-cell">Organization</th>
+          <th class="px-4 py-3 text-left font-semibold text-slate-600 hidden lg:table-cell">Position</th>
+          <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for doc in documents %}
+        <tr class="hover:bg-slate-50">
+          <td class="px-4 py-3 text-slate-600">{{ doc.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+          <td class="px-4 py-3">
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium {% if doc.generation_kind == 'legacy_email' %}bg-emerald-100 text-emerald-800{% else %}bg-violet-100 text-violet-800{% endif %}">
+              {% if doc.generation_kind == 'legacy_email' %}Quick Email{% else %}App Document{% endif %}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            {% if doc.document_type %}
+            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100">{{ doc.document_type.replace('_', ' ') | title }}</span>
+            {% else %}
+            <span class="text-slate-400">—</span>
+            {% endif %}
+          </td>
+          <td class="px-4 py-3 capitalize">{% if doc.purpose %}{{ doc.purpose }}{% else %}—{% endif %}</td>
+          <td class="px-4 py-3 hidden md:table-cell">{{ doc.document_metadata.get('organization', '—') }}</td>
+          <td class="px-4 py-3 hidden lg:table-cell">{{ doc.document_metadata.get('position_title', doc.intent or '—') }}</td>
+          <td class="px-4 py-3 text-right space-x-2 whitespace-nowrap">
+            <button type="button" class="text-indigo-600 hover:text-indigo-800 font-medium view-doc" data-id="{{ doc.id }}">View</button>
+            <button type="button" class="text-slate-600 hover:text-indigo-600 font-medium copy-doc" data-id="{{ doc.id }}">Copy</button>
+            <a href="/api/generations/{{ doc.id }}/pdf" class="text-slate-600 hover:text-indigo-600 font-medium">PDF</a>
+            <button type="button" class="text-rose-600 hover:text-rose-800 font-medium delete-doc" data-id="{{ doc.id }}">Delete</button>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="px-4 py-8 text-center text-slate-500">No documents yet. <a href="/dashboard/generate" class="text-indigo-600 font-medium">Generate one</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="doc-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
+    <div class="flex justify-between items-start mb-4">
+      <h2 class="text-lg font-bold text-slate-900">Document Preview</h2>
+      <button type="button" id="close-modal" class="text-slate-400 hover:text-slate-600 text-2xl leading-none">&times;</button>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+  const DEBUG_MODE = {{ 'true' if debug else 'false' }};
+
+  async function fetchDoc(id) {
+    const res = await fetch(`/api/generations/${id}`);
+    if (!res.ok) throw new Error('Failed to load document');
+    return res.json();
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderDocPreview(data) {
+    const showComparison = DEBUG_MODE && data.raw_body;
+    const tabs = showComparison ? `
+      <div class="mb-4 inline-flex rounded-lg border border-slate-200 bg-slate-50 p-1 text-sm">
+        <button type="button" data-modal-tab="humanized" class="modal-tab px-3 py-1.5 rounded-md bg-white shadow-sm font-medium text-indigo-700">Humanized</button>
+        <button type="button" data-modal-tab="original" class="modal-tab px-3 py-1.5 rounded-md text-slate-600">Original AI</button>
+      </div>
+      <p class="text-xs text-slate-500 mb-3">Dev mode: compare raw model output with the humanized version.</p>
+    ` : '';
+
+    const meta = data.metadata_json ? `<details class="mb-3 text-xs text-slate-600"><summary class="cursor-pointer font-medium">Metadata</summary><pre class="mt-2 whitespace-pre-wrap">${JSON.stringify(data.metadata_json, null, 2)}</pre></details>` : '';
+
+    const humanizedSubject = data.subject ? `<p class="text-sm mb-2 modal-humanized"><strong>Subject:</strong> ${escapeHtml(data.subject)}</p>` : '';
+    const humanizedBody = `<pre class="whitespace-pre-wrap text-sm text-slate-800 modal-humanized">${escapeHtml(data.body)}</pre>`;
+    const originalSubject = data.raw_subject ? `<p class="text-sm mb-2 modal-original hidden"><strong>Subject:</strong> ${escapeHtml(data.raw_subject)}</p>` : '';
+    const originalBody = data.raw_body ? `<pre class="whitespace-pre-wrap text-sm text-slate-800 modal-original hidden">${escapeHtml(data.raw_body)}</pre>` : '';
+
+    return tabs + meta + humanizedSubject + originalSubject + humanizedBody + originalBody;
+  }
+
+  document.querySelectorAll('.view-doc').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const data = await fetchDoc(btn.dataset.id);
+      const modal = document.getElementById('modal-content');
+      modal.innerHTML = renderDocPreview(data);
+      modal.querySelectorAll('.modal-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const humanized = tab.dataset.modalTab === 'humanized';
+          modal.querySelectorAll('.modal-tab').forEach((button) => {
+            button.classList.remove('bg-white', 'shadow-sm', 'font-medium', 'text-indigo-700');
+            button.classList.add('text-slate-600');
+          });
+          tab.classList.add('bg-white', 'shadow-sm', 'font-medium', 'text-indigo-700');
+          tab.classList.remove('text-slate-600');
+          modal.querySelectorAll('.modal-humanized').forEach((el) => el.classList.toggle('hidden', !humanized));
+          modal.querySelectorAll('.modal-original').forEach((el) => el.classList.toggle('hidden', humanized));
+        });
+      });
+      document.getElementById('doc-modal').classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.copy-doc').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const data = await fetchDoc(btn.dataset.id);
+      const text = data.clipboard_text || (data.subject ? `Subject: ${data.subject}\n\n${data.body}` : data.body);
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    });
+  });
+
+  document.querySelectorAll('.delete-doc').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this document?')) return;
+      const res = await fetch(`/api/generations/${btn.dataset.id}`, { method: 'DELETE' });
+      if (res.ok) btn.closest('tr')?.remove();
+    });
+  });
+
+  document.getElementById('close-modal')?.addEventListener('click', () => {
+    document.getElementById('doc-modal').classList.add('hidden');
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "layouts/dashboard.html" %}
+{% block main_class %}max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8{% endblock %}
+{% block title %}Scenarios — MailCraft{% endblock %}
+
+{% block dashboard_content %}
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+  <div>
+    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Scenarios</h1>
+    <p class="mt-2 text-slate-600">Manage editable system prompts for each document type.</p>
+  </div>
+  <button type="button" id="new-scenario-btn" class="inline-flex items-center px-4 py-2.5 rounded-xl font-medium bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">New Scenario</button>
+</div>
+
+<div class="grid gap-4">
+  {% for s in scenarios %}
+  <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h2 class="font-semibold text-slate-900">{{ s.name }}</h2>
+      <p class="text-sm text-slate-500 mt-1 capitalize">{{ s.purpose }} · {{ s.document_type.replace('_', ' ') }}</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/dashboard/scenarios/{{ s.id }}/edit" class="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50">Edit</a>
+      <button type="button" class="clone-btn px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50" data-id="{{ s.id }}">Clone</button>
+      {% if not s.is_default %}
+      <button type="button" class="delete-btn px-3 py-1.5 text-sm font-medium rounded-lg text-rose-600 border border-rose-200 hover:bg-rose-50" data-id="{{ s.id }}">Delete</button>
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <p class="text-slate-500">No scenarios found.</p>
+  {% endfor %}
+</div>
+
+<script>
+  document.querySelectorAll('.clone-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      await fetch(`/api/scenarios/${btn.dataset.id}/clone`, { method: 'POST', credentials: 'same-origin' });
+      location.reload();
+    });
+  });
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this scenario?')) return;
+      await fetch(`/api/scenarios/${btn.dataset.id}`, { method: 'DELETE', credentials: 'same-origin' });
+      location.reload();
+    });
+  });
+  document.getElementById('new-scenario-btn')?.addEventListener('click', async () => {
+    const name = prompt('Scenario name:');
+    if (!name) return;
+    const purpose = prompt('Purpose (interview, ms, phd):', 'interview');
+    const document_type = prompt('Document type (email, cover_letter):', 'email');
+    await fetch('/api/scenarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ name, purpose, document_type, system_prompt: '# Custom prompt\n\nWrite a professional document.' }),
+    });
+    location.reload();
+  });
+</script>
+{% endblock %}

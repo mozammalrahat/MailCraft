@@ -1,14 +1,22 @@
 <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
     <a href="/" class="flex items-center gap-2 group">
       <div class="bg-indigo-600 text-white p-1.5 rounded-lg group-hover:bg-indigo-700 transition-colors shadow-sm">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
       </div>
       <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-sky-500 tracking-tight">MailCraft</span>
     </a>
-    <div class="flex items-center gap-6 text-sm font-medium">
-      <a href="/" class="text-slate-600 hover:text-indigo-600 transition-colors">Home</a>
-      <a href="/generate" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors shadow-sm">Generate Email</a>
+    <div class="flex items-center gap-4 sm:gap-6 text-sm font-medium">
+      <a href="/" class="text-slate-600 hover:text-indigo-600 transition-colors hidden sm:inline">Home</a>
+      <a href="/generate" class="text-slate-600 hover:text-indigo-600 transition-colors">Quick Email</a>
+      {% if user is defined and user %}
+        <a href="/dashboard" class="text-slate-600 hover:text-indigo-600 transition-colors">Dashboard</a>
+        <a href="/dashboard/scenarios" class="text-slate-600 hover:text-indigo-600 transition-colors hidden sm:inline">Scenarios</a>
+        <a href="/dashboard/generate" class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">New Document</a>
+      {% else %}
+        <a href="/auth/login" class="text-slate-600 hover:text-indigo-600 transition-colors">Sign In</a>
+        <a href="/auth/register" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors shadow-sm">Register</a>
+      {% endif %}
     </div>
   </div>
 </nav>

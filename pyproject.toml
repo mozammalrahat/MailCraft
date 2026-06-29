@@ -5,17 +5,24 @@ description = "MailCraft - AI-powered professional email generation with advance
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.14.0",
+    "bcrypt>=4.2.0",
+    "email-validator>=2.2.0",
     "fastapi>=0.137.2",
     "google-genai>=2.8.0",
     "jinja2>=3.1.6",
     "pydantic-settings>=2.14.1",
+    "pyjwt>=2.10.0",
+    "pypdf>=5.1.0",
     "python-multipart>=0.0.32",
+    "reportlab>=4.4.0",
+    "sqlalchemy>=2.0.36",
     "uvicorn[standard]>=0.49.0",
 ]
 
 [project.scripts]
 mailcraft = "app.main:run"
-mailcraft-eval = "app.cli.evaluation:main"
+mailcraft-eval = "tools.evaluation.cli:main"
 
 [dependency-groups]
 dev = [
@@ -23,7 +30,6 @@ dev = [
     "pyrefly>=1.1.0",
     "pytest>=9.1.0",
     "pytest-asyncio>=1.4.0",
-    "reportlab>=5.0.0",
     "ruff>=0.15.18",
 ]
 
@@ -32,21 +38,22 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["app"]
+packages = ["app", "tools"]
 
 [tool.ruff]
 target-version = "py312"
 line-length = 88
-src = ["app", "tests", "scripts"]
+src = ["app", "tests", "scripts", "tools"]
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B"]
+select = ["E", "F", "I", "UP", "B", "D"]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D107"]
 
 [tool.ruff.format]
 quote-style = "double"
 
 [tool.pyrefly]
-project-includes = ["app", "tests"]
+project-includes = ["app", "tests", "tools"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

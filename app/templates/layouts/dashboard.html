@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-7xl mx-auto w-full">
+  <div class="flex flex-col lg:flex-row gap-8">
+    <aside class="lg:w-56 flex-shrink-0">
+      <nav class="bg-white rounded-2xl border border-slate-200 p-4 space-y-1 sticky lg:top-24">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">Dashboard</p>
+        <a href="/dashboard" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">History</a>
+        <a href="/dashboard/generate" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">Generate</a>
+        <a href="/dashboard/scenarios" class="block px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-indigo-50 hover:text-indigo-700">Scenarios</a>
+        <form method="post" action="/auth/logout" class="pt-2 border-t border-slate-100 mt-2">
+          <button type="submit" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-rose-600 hover:bg-rose-50">Logout</button>
+        </form>
+      </nav>
+    </aside>
+    <div class="flex-grow min-w-0">
+      {% block dashboard_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

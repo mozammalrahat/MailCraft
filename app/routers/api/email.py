@@ -1,23 +1,33 @@
-from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from app.config import Settings, get_settings
-from app.dependencies import get_llm_client
-from app.schemas.email import EmailGenerationRequest, EmailGenerationResponse
-from app.services.email.generation import generate_email
-from app.services.llm.client import LlmClient
+from app.api.dependencies.authentication import CurrentUserDependency
+from app.api.dependencies.database import DatabaseSessionDependency
+from app.api.dependencies.large_language_model import (
+    LargeLanguageModelClientDependency,
+    SettingsDependency,
+)
+from app.application.handlers.email_generation_handler import EmailGenerationHandler
+from app.schemas.email_generation import EmailGenerationRequest, EmailGenerationResponse
 
 router = APIRouter(prefix="/emails", tags=["emails"])
 
-LlmClientDep = Annotated[LlmClient, Depends(get_llm_client)]
-SettingsDep = Annotated[Settings, Depends(get_settings)]
+_email_generation_handler = EmailGenerationHandler()
 
 
 @router.post("/generate", response_model=EmailGenerationResponse)
 async def generate_email_endpoint(
     request: EmailGenerationRequest,
-    llm_client: LlmClientDep,
-    settings: SettingsDep,
+    current_user: CurrentUserDependency,
+    database_session: DatabaseSessionDependency,
+    settings: SettingsDependency,
+    language_model_client: LargeLanguageModelClientDependency,
 ) -> EmailGenerationResponse:
-    return await generate_email(request, llm_client, settings)
+    """Generate a legacy intent-based email and persist it."""
+    return await _email_generation_handler.generate_from_api(
+        request=request,
+        user_id=current_user.id,
+        database_session=database_session,
+        settings=settings,
+        language_model_client=language_model_client,
+    )

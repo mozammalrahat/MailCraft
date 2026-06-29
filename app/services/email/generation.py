@@ -1,67 +1,60 @@
-import logging
-import re
+"""Backward-compatible email generation service."""
 
-from app.config import Settings
-from app.schemas.email import EmailGenerationRequest, EmailGenerationResponse
-from app.services.email.prompt_builder import build_prompt, get_prompt_version
-from app.services.errors import ServiceValidationError
-from app.services.llm.client import LlmClient
+from app.application.handlers.email_generation_handler import EmailGenerationHandler
+from app.core.configuration import Settings
+from app.infrastructure.large_language_model.client import LargeLanguageModelClient
+from app.schemas.email_generation import EmailGenerationRequest, EmailGenerationResponse
 
-logger = logging.getLogger(__name__)
-
-_SUBJECT_PATTERN = re.compile(r"^Subject:\s*(.+)$", re.MULTILINE | re.IGNORECASE)
-
-
-def _parse_email_output(raw: str) -> tuple[str | None, str]:
-    match = _SUBJECT_PATTERN.search(raw)
-    if not match:
-        return None, raw.strip()
-
-    subject = match.group(1).strip()
-    body = raw[match.end() :].strip()
-    return subject, body
-
-
-def _format_email(subject: str | None, body: str) -> str:
-    return body
+_email_handler = EmailGenerationHandler()
 
 
 async def generate_email(
     request: EmailGenerationRequest,
-    llm_client: LlmClient,
+    language_model_client: LargeLanguageModelClient,
     settings: Settings,
+    *,
+    user_id: int | None = None,
+    database_session=None,
 ) -> EmailGenerationResponse:
-    if not request.key_facts:
-        raise ServiceValidationError("At least one key fact is required")
+    """Generate email without persistence when user_id is omitted."""
+    if user_id is not None and database_session is not None:
+        return await _email_handler.generate_from_api(
+            request=request,
+            user_id=user_id,
+            database_session=database_session,
+            settings=settings,
+            language_model_client=language_model_client,
+        )
 
-    strategy_key = request.strategy.value
-    strategy_config = settings.strategies.get(strategy_key)
-    if strategy_config is None:
-        raise ServiceValidationError(f"Unknown strategy: {strategy_key}")
-
-    prompt = build_prompt(request, strategy=strategy_key)
-
-    logger.info(
-        "generating email",
-        extra={
-            "strategy": strategy_key,
-            "model": strategy_config.model,
-            "tone": request.tone.value,
-            "fact_count": len(request.key_facts),
-        },
+    # Evaluation pipeline: generate without DB persistence
+    from app.application.pipelines.generation_context import GenerationContext
+    from app.application.pipelines.generation_pipeline import GenerationPipeline
+    from app.application.pipelines.steps import (
+        FormatOutputStep,
+        LanguageModelGenerationStep,
+        ValidateInputStep,
     )
+    from app.domain.enums.generation_kind import GenerationKind
 
-    raw_output = await llm_client.generate_content(
-        prompt,
-        model=strategy_config.model,
+    pipeline = GenerationPipeline(
+        steps=[ValidateInputStep(), LanguageModelGenerationStep(), FormatOutputStep()]
     )
-    subject, body = _parse_email_output(raw_output)
-    formatted_email = _format_email(subject, body)
-
+    context = GenerationContext(
+        user_id=0,
+        generation_kind=GenerationKind.LEGACY_EMAIL,
+        settings=settings,
+        database_session=database_session,
+        language_model_client=language_model_client,
+        intent=request.intent,
+        key_facts=request.key_facts,
+        tone=request.tone,
+        strategy=request.strategy,
+    )
+    context = await pipeline.run(context)
     return EmailGenerationResponse(
-        email=formatted_email,
-        subject=subject,
-        model=strategy_config.model,
-        strategy=strategy_key,
-        prompt_version=get_prompt_version(),
+        email=context.body,
+        subject=context.subject,
+        model=context.model_name or "",
+        strategy=context.strategy.value if context.strategy else "",
+        prompt_version=context.prompt_version or "",
     )

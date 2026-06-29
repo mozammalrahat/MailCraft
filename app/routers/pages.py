@@ -2,17 +2,29 @@ from dataclasses import dataclass, field
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
+from sqlalchemy.orm import Session
 
+from app.application.handlers.email_generation_handler import EmailGenerationHandler
 from app.config import Settings, get_settings
+from app.database.models.user import User
+from app.db.models import get_db
 from app.dependencies import get_llm_client
-from app.schemas.email import EmailGenerationRequest, EmailStrategy, EmailTone
-from app.services.email.generation import generate_email
+from app.domain.enums.email_strategy import EmailStrategy
+from app.domain.enums.email_tone import EmailTone
+from app.infrastructure.large_language_model.client import LargeLanguageModelClient
+from app.schemas.email_generation import EmailGenerationRequest
+from app.services.auth_service import (
+    ACCESS_COOKIE,
+    get_optional_user,
+    get_user_from_access_token,
+)
 from app.services.errors import LlmError, ServiceValidationError
-from app.services.llm.client import LlmClient
 
 router = APIRouter(tags=["pages"])
 templates = Jinja2Templates(directory="app/templates")
+_email_generation_handler = EmailGenerationHandler()
 
 TONE_OPTIONS = [tone.value for tone in EmailTone]
 
@@ -20,8 +32,10 @@ IntentForm = Annotated[str, Form(...)]
 KeyFactsForm = Annotated[list[str], Form(...)]
 ToneForm = Annotated[str, Form(...)]
 StrategyForm = Annotated[str, Form()]
-LlmClientDep = Annotated[LlmClient, Depends(get_llm_client)]
+LanguageModelClientDep = Annotated[LargeLanguageModelClient, Depends(get_llm_client)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
+DatabaseSessionDep = Annotated[Session, Depends(get_db)]
+OptionalUserDep = Annotated[object, Depends(get_optional_user)]
 
 
 @dataclass
@@ -44,51 +58,83 @@ class EmailPreview:
     subject: str | None
     tone: str
     strategy: str
+    raw_email: str | None = None
+    raw_subject: str | None = None
+    show_comparison: bool = False
+
+
+def _get_user_or_redirect(
+    request: Request, database_session: Session, settings: Settings,
+) -> User | RedirectResponse:
+    token = request.cookies.get(ACCESS_COOKIE)
+    if not token:
+        return RedirectResponse("/auth/login", status_code=303)
+    try:
+        return get_user_from_access_token(database_session, token, settings)
+    except Exception:
+        return RedirectResponse("/auth/login", status_code=303)
 
 
 def _render_generate_page(
     request: Request,
     *,
+    user: object | None = None,
     form: FormState | None = None,
     email_result: EmailPreview | None = None,
     messages: list[FlashMessage] | None = None,
+    settings: Settings | None = None,
 ) -> object:
+    app_settings = settings or get_settings()
     return templates.TemplateResponse(
         request=request,
         name="pages/generate.html",
         context={
+            "user": user,
             "form": form or FormState(),
             "email_result": email_result,
             "messages": messages or [],
             "tone_options": TONE_OPTIONS,
+            "debug": app_settings.debug,
         },
     )
 
 
 @router.get("/")
-def index(request: Request) -> object:
+def index(request: Request, user: OptionalUserDep) -> object:
     return templates.TemplateResponse(
         request=request,
         name="pages/index.html",
-        context={"title": "MailCraft"},
+        context={"title": "MailCraft", "user": user},
     )
 
 
 @router.get("/generate")
-def generate_form(request: Request) -> object:
-    return _render_generate_page(request)
+def generate_form(
+    request: Request,
+    database_session: DatabaseSessionDep,
+    settings: SettingsDep,
+) -> object:
+    user = _get_user_or_redirect(request, database_session, settings)
+    if isinstance(user, RedirectResponse):
+        return user
+    return _render_generate_page(request, user=user)
 
 
 @router.post("/generate")
 async def generate_submit(
     request: Request,
-    llm_client: LlmClientDep,
+    language_model_client: LanguageModelClientDep,
     settings: SettingsDep,
+    database_session: DatabaseSessionDep,
     intent: IntentForm,
     key_facts: KeyFactsForm,
     tone: ToneForm,
     strategy: StrategyForm = "strategy_a",
 ) -> object:
+    user = _get_user_or_redirect(request, database_session, settings)
+    if isinstance(user, RedirectResponse):
+        return user
+
     form = FormState(
         intent=intent.strip(),
         key_facts=[fact.strip() for fact in key_facts if fact.strip()] or [""],
@@ -100,6 +146,7 @@ async def generate_submit(
     if not cleaned_facts:
         return _render_generate_page(
             request,
+            user=user,
             form=form,
             messages=[FlashMessage("error", "At least one key fact is required.")],
         )
@@ -109,6 +156,7 @@ async def generate_submit(
     except ValueError:
         return _render_generate_page(
             request,
+            user=user,
             form=form,
             messages=[FlashMessage("error", f"Invalid tone: {tone}")],
         )
@@ -118,6 +166,7 @@ async def generate_submit(
     except ValueError:
         return _render_generate_page(
             request,
+            user=user,
             form=form,
             messages=[FlashMessage("error", f"Invalid strategy: {strategy}")],
         )
@@ -130,27 +179,41 @@ async def generate_submit(
     )
 
     try:
-        result = await generate_email(generation_request, llm_client, settings)
+        result = await _email_generation_handler.generate_from_api(
+            request=generation_request,
+            user_id=user.id,
+            database_session=database_session,
+            settings=settings,
+            language_model_client=language_model_client,
+        )
     except ServiceValidationError as exc:
         return _render_generate_page(
             request,
+            user=user,
             form=form,
             messages=[FlashMessage("error", exc.message)],
         )
     except LlmError as exc:
         return _render_generate_page(
             request,
+            user=user,
             form=form,
             messages=[FlashMessage("error", exc.message)],
         )
 
     return _render_generate_page(
         request,
+        user=user,
         form=form,
         email_result=EmailPreview(
             email=result.email,
             subject=result.subject,
             tone=tone,
             strategy=result.strategy,
+            raw_email=result.raw_email,
+            raw_subject=result.raw_subject,
+            show_comparison=settings.debug and bool(result.raw_email),
         ),
+        messages=[FlashMessage("success", "Saved to history.")],
+        settings=settings,
     )

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% import "components/ui.html" as ui %}
+
+{% block title %}Register — MailCraft{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+  {% call ui.card("Create Account") %}
+    {% if error %}
+      <div class="mb-4 p-3 rounded-xl bg-rose-50 text-rose-800 text-sm border border-rose-200">{{ error }}</div>
+    {% endif %}
+    <form method="post" action="/auth/register" class="space-y-4">
+      {{ ui.form_field("Email", "email", field_type="email", placeholder="you@example.com") }}
+      {{ ui.form_field("Password", "password", field_type="password", placeholder="At least 8 characters") }}
+      {{ ui.button("Register", extra_class="w-full") }}
+    </form>
+    <p class="mt-4 text-sm text-slate-600 text-center">
+      Already have an account? <a href="/auth/login" class="text-indigo-600 hover:text-indigo-800 font-medium">Sign in</a>
+    </p>
+  {% endcall %}
+</div>
+{% endblock %}
