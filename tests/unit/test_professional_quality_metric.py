@@ -1,8 +1,8 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from app.services.evaluation.metrics.base import MetricInput
-from app.services.evaluation.metrics.professional_quality import (
+from tools.evaluation.metrics.base import MetricInput
+from tools.evaluation.metrics.professional_quality import (
     ProfessionalQualityMetric,
 )
 

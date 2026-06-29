@@ -1,8 +1,8 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from app.services.evaluation.metrics.base import MetricInput
-from app.services.evaluation.metrics.tone_alignment import ToneAlignmentMetric
+from tools.evaluation.metrics.base import MetricInput
+from tools.evaluation.metrics.tone_alignment import ToneAlignmentMetric
 
 
 @pytest.mark.asyncio

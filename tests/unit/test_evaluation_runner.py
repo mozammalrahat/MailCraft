@@ -4,10 +4,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from app.config import Settings
 from app.schemas.evaluation import EvaluationReport, Scenario
-from app.services.evaluation.metrics.base import MetricDefinition, MetricScore
-from app.services.evaluation.metrics.fact_recall import FactRecallMetric
-from app.services.evaluation.report_writer import write_all_reports
-from app.services.evaluation.runner import run_evaluation, run_full_evaluation
+from tools.evaluation.metrics.base import MetricDefinition, MetricScore
+from tools.evaluation.metrics.fact_recall import FactRecallMetric
+from tools.evaluation.report_writer import write_all_reports
+from tools.evaluation.runner import run_evaluation, run_full_evaluation
 
 
 def _mock_llm_metric(name: str, value: float) -> MagicMock:
@@ -62,7 +62,7 @@ async def test_run_evaluation_scores_all_scenarios() -> None:
     ]
 
     with patch(
-        "app.services.evaluation.runner.get_all_metrics",
+        "tools.evaluation.runner.get_all_metrics",
         return_value=mock_metrics,
     ):
         result = await run_evaluation(
@@ -87,7 +87,7 @@ async def test_run_full_evaluation_builds_report() -> None:
     )
 
     with patch(
-        "app.services.evaluation.runner.run_evaluation",
+        "tools.evaluation.runner.run_evaluation",
         new_callable=AsyncMock,
     ) as mock_run:
         from app.schemas.evaluation import ScenarioScore, StrategyResult
@@ -152,7 +152,7 @@ def test_write_all_reports(tmp_path) -> None:
         ScenarioScore,
         StrategyResult,
     )
-    from app.services.evaluation.metrics.base import MetricDefinition
+    from tools.evaluation.metrics.base import MetricDefinition
 
     report = EvaluationReport(
         metadata=EvaluationMetadata(
