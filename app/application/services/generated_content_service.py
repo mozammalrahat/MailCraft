@@ -114,9 +114,6 @@ class GeneratedContentService:
         )
         return {
             "total": base_query.count(),
-            "legacy_emails": base_query.filter(
-                GeneratedContent.generation_kind == GenerationKind.LEGACY_EMAIL.value
-            ).count(),
             "application_documents": base_query.filter(
                 GeneratedContent.generation_kind
                 == GenerationKind.APPLICATION_DOCUMENT.value

@@ -9,7 +9,6 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
 from app.api.routes.api.auth_api import router as authentication_api_router
-from app.api.routes.api.email import router as email_generation_router
 from app.api.routes.api.generations import router as generated_content_router
 from app.api.routes.api.health import router as health_router
 from app.api.routes.api.jobs import router as jobs_router
@@ -73,7 +72,6 @@ def create_app() -> FastAPI:
 
     application.include_router(health_router, prefix="/api")
     application.include_router(jobs_router, prefix="/api")
-    application.include_router(email_generation_router, prefix="/api")
     application.include_router(authentication_api_router, prefix="/api")
     application.include_router(scenario_router, prefix="/api")
     application.include_router(generated_content_router, prefix="/api")

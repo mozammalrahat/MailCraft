@@ -1,4 +1,4 @@
-"""Optional grounding research step (no-op for legacy emails)."""
+"""Optional grounding research step."""
 
 from app.application.pipelines.generation_context import GenerationContext
 from app.domain.enums.generation_kind import GenerationKind

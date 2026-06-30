@@ -65,6 +65,17 @@ def build_clipboard_text(*, subject: str | None, body: str) -> str:
     return formatted_body
 
 
+def parse_subject_body_output(raw_output: str) -> tuple[str | None, str]:
+    """Parse subject and body from raw LLM output containing a Subject: line."""
+    match = _SUBJECT_LINE_PATTERN.search(raw_output)
+    if not match:
+        return None, raw_output.strip()
+
+    subject = match.group(1).strip()
+    body = raw_output[match.end() :].strip()
+    return subject, body
+
+
 def _strip_subject_line(body: str, subject: str | None) -> str:
     text = _SUBJECT_STRIP_PATTERN.sub("", body.strip(), count=1)
     if subject:

@@ -6,10 +6,8 @@ from app.application.services.email_formatting_service import (
     format_document_body,
     resolve_subject_and_body,
 )
-from app.application.services.email_generation_service import parse_legacy_email_output
 from app.core.exceptions import LlmError
 from app.domain.enums.document_type import DocumentType
-from app.domain.enums.generation_kind import GenerationKind
 from app.schemas.application_document import StructuredApplicationDocumentOutput
 
 
@@ -18,17 +16,6 @@ class FormatOutputStep:
 
     async def process(self, context: GenerationContext) -> GenerationContext:
         """Format subject, body, and clipboard text."""
-        if context.generation_kind == GenerationKind.LEGACY_EMAIL:
-            subject, body = parse_legacy_email_output(context.raw_language_model_output)
-            formatted_body = format_document_body(body)
-            context.subject = subject
-            context.body = formatted_body
-            context.clipboard_text = build_clipboard_text(
-                subject=subject,
-                body=formatted_body,
-            )
-            return context
-
         output = StructuredApplicationDocumentOutput.model_validate(
             context.structured_output
         )

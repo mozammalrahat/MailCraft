@@ -2,15 +2,8 @@
 
 from functools import lru_cache
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-
-class StrategyConfiguration(BaseModel):
-    """Model and name pairing for a prompting strategy."""
-
-    name: str
-    model: str
 
 
 class Settings(BaseSettings):
@@ -152,20 +145,6 @@ class Settings(BaseSettings):
         if self.debug:
             return "text"
         return self.log_format
-
-    @property
-    def strategies(self) -> dict[str, StrategyConfiguration]:
-        """Return configured strategy-to-model mappings."""
-        return {
-            "strategy_a": StrategyConfiguration(
-                name="strategy_a",
-                model=self.google_model_a,
-            ),
-            "strategy_b": StrategyConfiguration(
-                name="strategy_b",
-                model=self.google_model_b,
-            ),
-        }
 
 
 @lru_cache

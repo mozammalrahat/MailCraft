@@ -3,25 +3,13 @@
 from app.application.pipelines.generation_context import GenerationContext
 from app.core.exceptions import ServiceValidationError
 from app.database.models.scenario import Scenario
-from app.domain.enums.generation_kind import GenerationKind
 
 
 class ValidateInputStep:
     """Validate inputs before generation, raising on first failure."""
 
     async def process(self, context: GenerationContext) -> GenerationContext:
-        """Validate context fields for the selected generation kind."""
-        if context.generation_kind == GenerationKind.LEGACY_EMAIL:
-            if not context.intent or not context.intent.strip():
-                raise ServiceValidationError("Intent is required")
-            if not context.key_facts:
-                raise ServiceValidationError("At least one key fact is required")
-            if context.tone is None:
-                raise ServiceValidationError("Tone is required")
-            if context.strategy is None:
-                raise ServiceValidationError("Strategy is required")
-            return context
-
+        """Validate context fields for application document generation."""
         if context.purpose is None or context.document_type is None:
             raise ServiceValidationError("Purpose and document type are required")
         if not context.position_description or not context.position_description.strip():

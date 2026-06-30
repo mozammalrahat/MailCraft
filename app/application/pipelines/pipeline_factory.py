@@ -13,19 +13,6 @@ from app.application.pipelines.steps import (
 )
 
 
-def build_legacy_email_pipeline(*, include_persist: bool) -> GenerationPipeline:
-    """Build the legacy email pipeline shared by production and eval."""
-    steps = [
-        ValidateInputStep(),
-        LanguageModelGenerationStep(),
-        FormatOutputStep(),
-        HumanizeContentStep(),
-    ]
-    if include_persist:
-        steps.append(PersistGeneratedContentStep())
-    return GenerationPipeline(steps=steps)
-
-
 def build_application_document_pipeline() -> GenerationPipeline:
     """Build the application document pipeline (always persists)."""
     return GenerationPipeline(

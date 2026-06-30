@@ -5,17 +5,39 @@ from app.application.pipelines.generation_context import GenerationContext
 from app.application.pipelines.steps.humanize_content_step import HumanizeContentStep
 from app.core.configuration import Settings
 from app.core.exceptions import LlmError
-from app.domain.enums.email_tone import EmailTone
+from app.domain.enums.application_purpose import ApplicationPurpose
+from app.domain.enums.document_type import DocumentType
 from app.domain.enums.generation_kind import GenerationKind
+
+
+def _app_doc_context(**overrides) -> GenerationContext:
+    context = GenerationContext(
+        user_id=1,
+        generation_kind=GenerationKind.APPLICATION_DOCUMENT,
+        settings=Settings(
+            google_api_key="test-key",
+            GOOGLE_MODEL_A="gemini-test",
+            humanize_content_enabled=True,
+        ),
+        database_session=MagicMock(),
+        language_model_client=MagicMock(),
+        purpose=ApplicationPurpose.INTERVIEW,
+        document_type=DocumentType.EMAIL,
+        scenario_id=1,
+        position_description="ML Engineer",
+        document_metadata={
+            "tone_used": "formal",
+            "key_highlights_used": ["Demo on Tuesday", "Pricing for 50 seats"],
+            "matched_skills": [],
+        },
+    )
+    for key, value in overrides.items():
+        setattr(context, key, value)
+    return context
 
 
 @pytest.mark.asyncio
 async def test_humanize_content_step_preserves_raw_and_updates_body() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
-        humanize_content_enabled=True,
-    )
     language_model_client = MagicMock()
     language_model_client.generate_content = AsyncMock(
         return_value=(
@@ -25,16 +47,7 @@ async def test_humanize_content_step_preserves_raw_and_updates_body() -> None:
         )
     )
 
-    context = GenerationContext(
-        user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
-        settings=settings,
-        database_session=MagicMock(),
-        language_model_client=language_model_client,
-        intent="Follow up after demo",
-        key_facts=["Demo on Tuesday", "Pricing for 50 seats"],
-        tone=EmailTone.FORMAL,
-    )
+    context = _app_doc_context(language_model_client=language_model_client)
     context.subject = "Follow-Up Regarding Product Demonstration"
     context.body = (
         "Dear Recipient,\n\n"
@@ -56,19 +69,15 @@ async def test_humanize_content_step_preserves_raw_and_updates_body() -> None:
 
 @pytest.mark.asyncio
 async def test_humanize_content_step_skips_when_disabled() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
-        humanize_content_enabled=False,
-    )
     language_model_client = MagicMock()
     language_model_client.generate_content = AsyncMock()
 
-    context = GenerationContext(
-        user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
-        settings=settings,
-        database_session=MagicMock(),
+    context = _app_doc_context(
+        settings=Settings(
+            google_api_key="test-key",
+            GOOGLE_MODEL_A="gemini-test",
+            humanize_content_enabled=False,
+        ),
         language_model_client=language_model_client,
     )
     context.body = "Original body"
@@ -83,24 +92,12 @@ async def test_humanize_content_step_skips_when_disabled() -> None:
 
 @pytest.mark.asyncio
 async def test_humanize_content_step_fallback_on_llm_error() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
-        humanize_content_enabled=True,
-    )
     language_model_client = MagicMock()
     language_model_client.generate_content = AsyncMock(
         side_effect=LlmError("API unavailable")
     )
 
-    context = GenerationContext(
-        user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
-        settings=settings,
-        database_session=MagicMock(),
-        language_model_client=language_model_client,
-        key_facts=["Demo on Tuesday"],
-    )
+    context = _app_doc_context(language_model_client=language_model_client)
     context.subject = "Original subject"
     context.body = "Original body with Demo on Tuesday."
 
@@ -114,11 +111,6 @@ async def test_humanize_content_step_fallback_on_llm_error() -> None:
 
 @pytest.mark.asyncio
 async def test_humanize_content_step_fallback_when_facts_dropped() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
-        humanize_content_enabled=True,
-    )
     language_model_client = MagicMock()
     language_model_client.generate_content = AsyncMock(
         return_value=(
@@ -127,16 +119,7 @@ async def test_humanize_content_step_fallback_when_facts_dropped() -> None:
         )
     )
 
-    context = GenerationContext(
-        user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
-        settings=settings,
-        database_session=MagicMock(),
-        language_model_client=language_model_client,
-        intent="Follow up after demo",
-        key_facts=["Demo on Tuesday", "Pricing for 50 seats"],
-        tone=EmailTone.FORMAL,
-    )
+    context = _app_doc_context(language_model_client=language_model_client)
     context.subject = "Follow-Up Regarding Product Demonstration"
     context.body = (
         "Dear Recipient,\n\n"

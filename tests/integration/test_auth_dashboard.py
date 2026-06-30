@@ -20,3 +20,24 @@ def test_register_and_login_flow(client) -> None:
 
     blocked = client.get("/dashboard", follow_redirects=False)
     assert blocked.status_code == 303
+
+
+def test_dashboard_search_accepts_empty_select_filters(client) -> None:
+    client.post(
+        "/auth/register",
+        data={"email": "search@example.com", "password": "password123"},
+        follow_redirects=False,
+    )
+
+    response = client.get(
+        "/dashboard",
+        params={
+            "purpose": "",
+            "document_type": "",
+            "scenario_id": "",
+            "q": "Acme",
+        },
+    )
+
+    assert response.status_code == 200
+    assert "Acme" in response.text

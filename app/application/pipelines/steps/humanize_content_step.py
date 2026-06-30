@@ -29,18 +29,17 @@ class HumanizeContentStep:
         context.raw_subject = context.subject
         context.raw_body = context.body
 
-        tone_label = context.tone.value if context.tone else "formal"
-        if (
-            context.generation_kind.value == "application_document"
-            and context.document_metadata
-        ):
-            tone_label = str(
-                context.document_metadata.get("tone_used") or tone_label
-            )
+        tone_label = "formal"
+        if context.document_metadata:
+            tone_label = str(context.document_metadata.get("tone_used") or tone_label)
 
-        facts_to_preserve = list(context.key_facts)
-        if context.intent:
-            facts_to_preserve.insert(0, context.intent)
+        facts_to_preserve: list[str] = []
+        highlights = context.document_metadata.get("key_highlights_used")
+        if isinstance(highlights, list):
+            facts_to_preserve.extend(str(item) for item in highlights if item)
+        matched_skills = context.document_metadata.get("matched_skills")
+        if isinstance(matched_skills, list):
+            facts_to_preserve.extend(str(item) for item in matched_skills if item)
 
         prompt = build_content_humanizer_prompt(
             subject=context.subject,

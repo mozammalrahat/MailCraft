@@ -26,7 +26,7 @@ def test_list_for_user_filters_by_generation_kind(database_session) -> None:
     records, total = service.list_for_user(
         user.id,
         filters=GeneratedContentFilters(
-            generation_kind=GenerationKind.LEGACY_EMAIL.value
+            generation_kind=GenerationKind.APPLICATION_DOCUMENT.value
         ),
     )
 
@@ -51,5 +51,5 @@ def test_get_dashboard_stats_returns_zero_counts(database_session) -> None:
     stats = service.get_dashboard_stats(user.id)
 
     assert stats["total"] == 0
-    assert stats["legacy_emails"] == 0
+    assert stats["application_documents"] == 0
     assert stats["scenarios"] == 6

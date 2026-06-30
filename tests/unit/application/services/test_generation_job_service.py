@@ -21,8 +21,15 @@ def test_generation_job_service_create_and_get_owned(database_session) -> None:
     service = GenerationJobService(database_session)
     job = service.create_job(
         user_id=user.id,
-        kind=GenerationKind.LEGACY_EMAIL.value,
-        payload={"intent": "Follow up", "key_facts": ["Fact"], "tone": "formal"},
+        kind=GenerationKind.APPLICATION_DOCUMENT.value,
+        payload={
+            "purpose": "interview",
+            "document_type": "email",
+            "scenario_id": 1,
+            "position_description": "ML Engineer role",
+            "resume_files": [],
+            "grounding_links": [],
+        },
     )
 
     loaded = service.get_owned(user.id, job.id)
@@ -34,8 +41,15 @@ def test_generation_job_service_rejects_foreign_owner(database_session) -> None:
     service = GenerationJobService(database_session)
     job = service.create_job(
         user_id=user.id,
-        kind=GenerationKind.LEGACY_EMAIL.value,
-        payload={"intent": "Follow up", "key_facts": ["Fact"], "tone": "formal"},
+        kind=GenerationKind.APPLICATION_DOCUMENT.value,
+        payload={
+            "purpose": "interview",
+            "document_type": "email",
+            "scenario_id": 1,
+            "position_description": "ML Engineer role",
+            "resume_files": [],
+            "grounding_links": [],
+        },
     )
 
     with pytest.raises(HTTPException) as exc:

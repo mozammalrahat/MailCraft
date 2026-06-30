@@ -4,7 +4,6 @@ import json
 
 from app.application.pipelines.generation_context import GenerationContext
 from app.database.models.generated_content import GeneratedContent
-from app.domain.enums.generation_kind import GenerationKind
 
 
 class PersistGeneratedContentStep:
@@ -28,31 +27,22 @@ class PersistGeneratedContentStep:
                 if context.humanization_applied
                 else None
             ),
-        )
-
-        if context.generation_kind == GenerationKind.LEGACY_EMAIL:
-            record.intent = context.intent
-            record.key_facts = context.key_facts
-            record.tone = context.tone.value if context.tone else None
-            record.strategy = context.strategy.value if context.strategy else None
-            record.model_name = context.model_name
-            record.prompt_version = context.prompt_version
-        else:
-            record.scenario_id = context.scenario_id
-            record.purpose = context.purpose.value if context.purpose else None
-            record.document_type = (
+            scenario_id=context.scenario_id,
+            purpose=context.purpose.value if context.purpose else None,
+            document_type=(
                 context.document_type.value if context.document_type else None
-            )
-            record.position_description = context.position_description
-            record.cv_extracted_text = context.resume_text
-            record.cv_filenames = context.resume_filenames
-            record.grounding_links = context.grounding_links
-            if context.resume_storage_keys:
-                record.resume_storage_keys = context.resume_storage_keys
-            record.document_metadata = context.document_metadata
-            record.model_name = context.model_name
-            if context.grounding_metadata:
-                record.grounding_metadata_json = json.dumps(context.grounding_metadata)
+            ),
+            position_description=context.position_description,
+            cv_extracted_text=context.resume_text,
+            cv_filenames=context.resume_filenames,
+            grounding_links=context.grounding_links,
+            document_metadata=context.document_metadata,
+            model_name=context.model_name,
+        )
+        if context.resume_storage_keys:
+            record.resume_storage_keys = context.resume_storage_keys
+        if context.grounding_metadata:
+            record.grounding_metadata_json = json.dumps(context.grounding_metadata)
 
         context.database_session.add(record)
         context.database_session.commit()

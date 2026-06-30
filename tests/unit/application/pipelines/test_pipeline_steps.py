@@ -1,8 +1,4 @@
-"""Unit tests for pipeline steps.
-
-Covers ValidateInputStep, ExtractResumeTextStep, GroundingResearchStep,
-FormatOutputStep, and LanguageModelGenerationStep.
-"""
+"""Unit tests for pipeline steps."""
 
 from io import BytesIO
 from unittest.mock import AsyncMock, MagicMock
@@ -24,8 +20,6 @@ from app.core.configuration import Settings
 from app.core.exceptions import LlmError, ServiceValidationError
 from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
-from app.domain.enums.email_strategy import EmailStrategy
-from app.domain.enums.email_tone import EmailTone
 from app.domain.enums.generation_kind import GenerationKind
 from reportlab.pdfgen import canvas
 
@@ -57,44 +51,6 @@ def _minimal_pdf(text: str = "Jane Doe — Python developer") -> bytes:
     c.drawString(72, 720, text)
     c.save()
     return buf.getvalue()
-
-
-# ---------------------------------------------------------------------------
-# ValidateInputStep
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_validate_input_step_raises_on_missing_intent() -> None:
-    ctx = _make_context(GenerationKind.LEGACY_EMAIL, tone=EmailTone.FORMAL,
-                        strategy=EmailStrategy.STRATEGY_A)
-    with pytest.raises(ServiceValidationError, match="Intent is required"):
-        await ValidateInputStep().process(ctx)
-
-
-@pytest.mark.asyncio
-async def test_validate_input_step_raises_on_empty_key_facts() -> None:
-    ctx = _make_context(
-        GenerationKind.LEGACY_EMAIL,
-        intent="Test",
-        tone=EmailTone.FORMAL,
-        strategy=EmailStrategy.STRATEGY_A,
-    )
-    with pytest.raises(ServiceValidationError, match="key fact"):
-        await ValidateInputStep().process(ctx)
-
-
-@pytest.mark.asyncio
-async def test_validate_input_step_passes_valid_legacy_email() -> None:
-    ctx = _make_context(
-        GenerationKind.LEGACY_EMAIL,
-        intent="Test intent",
-        key_facts=["Fact one"],
-        tone=EmailTone.FORMAL,
-        strategy=EmailStrategy.STRATEGY_A,
-    )
-    result = await ValidateInputStep().process(ctx)
-    assert result is ctx
 
 
 @pytest.mark.asyncio
@@ -171,11 +127,6 @@ async def test_validate_input_step_sets_system_instruction_from_scenario() -> No
     assert result.system_instruction == "You are a helpful assistant."
 
 
-# ---------------------------------------------------------------------------
-# ExtractResumeTextStep
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.asyncio
 async def test_extract_resume_text_step_skips_when_no_files() -> None:
     ctx = _make_context(GenerationKind.APPLICATION_DOCUMENT)
@@ -196,18 +147,6 @@ async def test_extract_resume_text_step_extracts_pdf_text() -> None:
     assert "alice_cv.pdf" in result.resume_filenames
 
 
-# ---------------------------------------------------------------------------
-# GroundingResearchStep
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_grounding_research_step_skips_legacy_email() -> None:
-    ctx = _make_context(GenerationKind.LEGACY_EMAIL)
-    result = await GroundingResearchStep().process(ctx)
-    assert result.user_prompt == ""
-
-
 @pytest.mark.asyncio
 async def test_grounding_research_step_builds_user_prompt() -> None:
     ctx = _make_context(
@@ -220,31 +159,6 @@ async def test_grounding_research_step_builds_user_prompt() -> None:
     result = await GroundingResearchStep().process(ctx)
     assert result.user_prompt != ""
     assert "Senior ML Engineer" in result.user_prompt or result.user_prompt
-
-
-# ---------------------------------------------------------------------------
-# FormatOutputStep
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.asyncio
-async def test_format_output_step_skips_on_validation_errors() -> None:
-    ctx = _make_context(GenerationKind.LEGACY_EMAIL)
-    ctx.validation_errors = ["some error"]
-    result = await FormatOutputStep().process(ctx)
-    assert result.body == ""
-
-
-@pytest.mark.asyncio
-async def test_format_output_step_parses_legacy_email_subject_and_body() -> None:
-    ctx = _make_context(GenerationKind.LEGACY_EMAIL)
-    ctx.raw_language_model_output = (
-        "Subject: Hello World\n\nDear Test,\n\nThis is the body."
-    )
-    result = await FormatOutputStep().process(ctx)
-    assert result.subject == "Hello World"
-    assert "This is the body" in result.body
-    assert result.clipboard_text != ""
 
 
 @pytest.mark.asyncio
@@ -272,67 +186,53 @@ async def test_format_output_step_parses_application_document() -> None:
     assert result.clipboard_text
 
 
-# ---------------------------------------------------------------------------
-# LanguageModelGenerationStep
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.asyncio
-async def test_language_model_generation_step_calls_llm_for_legacy_email() -> None:
+async def test_language_model_generation_step_calls_structured_llm() -> None:
     llm = MagicMock()
-    llm.generate_content = AsyncMock(
-        return_value="Subject: Test\n\nHello test email."
+    llm.generate_structured_with_grounding = AsyncMock(
+        return_value=(
+            {
+                "subject": "Application",
+                "body": "Dear Hiring Manager,\n\nI am interested.",
+                "metadata": {
+                    "generation_reason": "apply",
+                    "organization": "Acme",
+                    "position_title": "Engineer",
+                    "recipient_name": "Hiring Manager",
+                    "matched_skills": [],
+                    "key_highlights_used": [],
+                    "tone_used": "formal",
+                },
+            },
+            None,
+        )
     )
     ctx = GenerationContext(
         user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
+        generation_kind=GenerationKind.APPLICATION_DOCUMENT,
         settings=_make_settings(),
         database_session=MagicMock(),
         language_model_client=llm,
-        intent="Test intent",
-        key_facts=["Fact one"],
-        tone=EmailTone.FORMAL,
-        strategy=EmailStrategy.STRATEGY_A,
+        system_instruction="Write professionally.",
+        user_prompt="Generate an email.",
     )
     result = await LanguageModelGenerationStep().process(ctx)
-    assert result.raw_language_model_output == "Subject: Test\n\nHello test email."
-    llm.generate_content.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_language_model_generation_step_raises_on_unknown_strategy() -> None:
-    """Unknown strategy now raises ServiceValidationError (fail-fast)."""
-    llm = MagicMock()
-    llm.generate_content = AsyncMock()
-    settings = _make_settings()
-    ctx = GenerationContext(
-        user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
-        settings=settings,
-        database_session=MagicMock(),
-        language_model_client=llm,
-    )
-    ctx.strategy = MagicMock()
-    ctx.strategy.value = "nonexistent_strategy"
-    with pytest.raises(ServiceValidationError):
-        await LanguageModelGenerationStep().process(ctx)
-    llm.generate_content.assert_not_awaited()
+    assert result.structured_output["subject"] == "Application"
+    llm.generate_structured_with_grounding.assert_awaited_once()
 
 
 @pytest.mark.asyncio
 async def test_language_model_generation_step_propagates_llm_error() -> None:
     llm = MagicMock()
-    llm.generate_content = AsyncMock(side_effect=LlmError("API down"))
+    llm.generate_structured_with_grounding = AsyncMock(side_effect=LlmError("API down"))
     ctx = GenerationContext(
         user_id=1,
-        generation_kind=GenerationKind.LEGACY_EMAIL,
+        generation_kind=GenerationKind.APPLICATION_DOCUMENT,
         settings=_make_settings(),
         database_session=MagicMock(),
         language_model_client=llm,
-        intent="Test",
-        key_facts=["Fact"],
-        tone=EmailTone.FORMAL,
-        strategy=EmailStrategy.STRATEGY_A,
+        system_instruction="Write professionally.",
+        user_prompt="Generate an email.",
     )
     with pytest.raises(LlmError, match="API down"):
         await LanguageModelGenerationStep().process(ctx)

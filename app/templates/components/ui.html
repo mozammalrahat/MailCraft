@@ -44,10 +44,3 @@
     {% endif %}
   </div>
 {% endmacro %}
-
-{% macro tone_badge(tone) %}
-  {% set tone_color = 'bg-emerald-50 text-emerald-700 border-emerald-200' if tone == 'formal' else 'bg-sky-50 text-sky-700 border-sky-200' if tone == 'casual' else 'bg-red-50 text-red-700 border-red-200' if tone == 'urgent' else 'bg-violet-50 text-violet-700 border-violet-200' %}
-  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border {{ tone_color }}">
-    {{ tone | title }}
-  </span>
-{% endmacro %}

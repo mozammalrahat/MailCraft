@@ -21,6 +21,21 @@ templates = Jinja2Templates(directory="app/templates")
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 
 
+def _optional_query_str(value: str | None) -> str | None:
+    """Treat blank HTML form values as unset query parameters."""
+    if value is None or not value.strip():
+        return None
+    return value.strip()
+
+
+def _optional_query_int(value: str | None) -> int | None:
+    """Parse optional integer query params from HTML forms."""
+    cleaned = _optional_query_str(value)
+    if cleaned is None:
+        return None
+    return int(cleaned)
+
+
 @router.get("")
 def dashboard_home(
     request: Request,
@@ -30,22 +45,28 @@ def dashboard_home(
     generation_kind: str | None = None,
     purpose: str | None = None,
     document_type: str | None = None,
-    scenario_id: int | None = None,
+    scenario_id: str | None = None,
     q: str | None = None,
 ):
     if isinstance(page_user, RedirectResponse):
         return page_user
+
+    parsed_generation_kind = _optional_query_str(generation_kind)
+    parsed_purpose = _optional_query_str(purpose)
+    parsed_document_type = _optional_query_str(document_type)
+    parsed_scenario_id = _optional_query_int(scenario_id)
+    parsed_query = _optional_query_str(q)
 
     content_service = GeneratedContentService(database_session)
     scenario_service = ScenarioService(database_session)
     documents, _ = content_service.list_for_user(
         page_user.id,
         filters=GeneratedContentFilters(
-            generation_kind=generation_kind,
-            purpose=purpose,
-            document_type=document_type,
-            scenario_id=scenario_id,
-            query_text=q,
+            generation_kind=parsed_generation_kind,
+            purpose=parsed_purpose,
+            document_type=parsed_document_type,
+            scenario_id=parsed_scenario_id,
+            query_text=parsed_query,
         ),
         limit=50,
     )
@@ -64,11 +85,13 @@ def dashboard_home(
             "document_types": [d.value for d in DocumentType],
             "generation_kinds": [k.value for k in GenerationKind],
             "filters": {
-                "generation_kind": generation_kind or "",
-                "purpose": purpose or "",
-                "document_type": document_type or "",
-                "scenario_id": scenario_id or "",
-                "q": q or "",
+                "generation_kind": parsed_generation_kind or "",
+                "purpose": parsed_purpose or "",
+                "document_type": parsed_document_type or "",
+                "scenario_id": (
+                    parsed_scenario_id if parsed_scenario_id is not None else ""
+                ),
+                "q": parsed_query or "",
             },
             "debug": settings.debug,
         },
