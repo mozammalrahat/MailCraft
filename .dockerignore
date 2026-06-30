@@ -1,0 +1,19 @@
+# Build context exclusions
+.env
+.env.*
+!.env.production.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+data/
+reports/
+.git/
+.cursor/
+*.md
+!docs/DEPLOYMENT.md
+tests/
+Assessment.md
+job-description.txt
+submission_email_draft.txt
