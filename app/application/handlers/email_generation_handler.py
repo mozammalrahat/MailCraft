@@ -1,14 +1,7 @@
 """Handler for legacy email generation."""
 
 from app.application.pipelines.generation_context import GenerationContext
-from app.application.pipelines.generation_pipeline import GenerationPipeline
-from app.application.pipelines.steps import (
-    FormatOutputStep,
-    HumanizeContentStep,
-    LanguageModelGenerationStep,
-    PersistGeneratedContentStep,
-    ValidateInputStep,
-)
+from app.application.pipelines.pipeline_factory import build_legacy_email_pipeline
 from app.core.configuration import Settings
 from app.domain.enums.generation_kind import GenerationKind
 from app.infrastructure.large_language_model.client import LargeLanguageModelClient
@@ -20,15 +13,7 @@ class EmailGenerationHandler:
     """Orchestrate legacy email generation through the pipeline."""
 
     def __init__(self) -> None:
-        self._pipeline = GenerationPipeline(
-            steps=[
-                ValidateInputStep(),
-                LanguageModelGenerationStep(),
-                FormatOutputStep(),
-                HumanizeContentStep(),
-                PersistGeneratedContentStep(),
-            ]
-        )
+        self._pipeline = build_legacy_email_pipeline(include_persist=True)
 
     async def generate_from_api(
         self,

@@ -7,10 +7,10 @@ from app.application.services.email_formatting_service import (
     resolve_subject_and_body,
 )
 from app.application.services.email_generation_service import parse_legacy_email_output
+from app.core.exceptions import LlmError
 from app.domain.enums.document_type import DocumentType
 from app.domain.enums.generation_kind import GenerationKind
 from app.schemas.application_document import StructuredApplicationDocumentOutput
-from app.services.errors import LlmError
 
 
 class FormatOutputStep:
@@ -18,9 +18,6 @@ class FormatOutputStep:
 
     async def process(self, context: GenerationContext) -> GenerationContext:
         """Format subject, body, and clipboard text."""
-        if context.validation_errors:
-            return context
-
         if context.generation_kind == GenerationKind.LEGACY_EMAIL:
             subject, body = parse_legacy_email_output(context.raw_language_model_output)
             formatted_body = format_document_body(body)

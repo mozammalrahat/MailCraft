@@ -2,9 +2,12 @@ import asyncio
 import json
 import logging
 import re
+import time
+from collections.abc import Awaitable, Callable
+from typing import TypeVar
 
 from app.core.configuration import Settings
-from app.services.errors import LlmError
+from app.core.exceptions import LlmError
 from google import genai
 from google.genai import errors as genai_errors
 from google.genai import types
@@ -15,6 +18,8 @@ _JSON_FENCE_PATTERN = re.compile(
     r"^```(?:json)?\s*\n?(.*?)\n?```\s*$",
     re.DOTALL | re.IGNORECASE,
 )
+_RETRYABLE_STATUS_CODES = {429, 500, 503}
+T = TypeVar("T")
 
 
 class LargeLanguageModelClient:
@@ -47,28 +52,94 @@ class LargeLanguageModelClient:
             )
             await asyncio.sleep(self._request_delay_seconds)
 
+    async def _execute_with_retry(
+        self,
+        operation: str,
+        model: str,
+        call: Callable[[], Awaitable[T]],
+    ) -> T:
+        """Run an LLM call with exponential backoff on transient API errors."""
+        max_retries = self._settings.llm_max_retries
+        base_delay = self._settings.llm_retry_base_delay_seconds
+        max_delay = self._settings.llm_retry_max_delay_seconds
+
+        for attempt in range(1, max_retries + 1):
+            start = time.perf_counter()
+            try:
+                result = await call()
+            except genai_errors.APIError as exc:
+                elapsed_ms = round((time.perf_counter() - start) * 1000)
+                retryable = exc.code in _RETRYABLE_STATUS_CODES
+                is_final_attempt = attempt >= max_retries
+
+                logger.info(
+                    "LLM call completed",
+                    extra={
+                        "operation": operation,
+                        "model": model,
+                        "latency_ms": elapsed_ms,
+                        "attempt": attempt,
+                        "success": False,
+                        "status_code": exc.code,
+                    },
+                )
+
+                if not retryable or is_final_attempt:
+                    raise LlmError(f"LLM request failed: {exc.message}") from exc
+
+                delay = min(base_delay * (2 ** (attempt - 1)), max_delay)
+                logger.warning(
+                    "Retrying LLM call after transient failure",
+                    extra={
+                        "operation": operation,
+                        "model": model,
+                        "status_code": exc.code,
+                        "attempt": attempt,
+                        "retry_delay_seconds": delay,
+                    },
+                )
+                await asyncio.sleep(delay)
+                continue
+
+            elapsed_ms = round((time.perf_counter() - start) * 1000)
+            logger.info(
+                "LLM call completed",
+                extra={
+                    "operation": operation,
+                    "model": model,
+                    "latency_ms": elapsed_ms,
+                    "attempt": attempt,
+                    "success": True,
+                },
+            )
+            return result
+
+        raise LlmError("LLM request failed after retries")
+
     async def generate_content(self, prompt: str, *, model: str | None = None) -> str:
         resolved_model = model or self._settings.google_judge_model
-        client = self._get_client()
 
-        try:
+        async def _call() -> str:
+            client = self._get_client()
             response = await client.aio.models.generate_content(
                 model=resolved_model,
                 contents=prompt,
             )
-        except genai_errors.APIError as exc:
-            logger.error(
-                "LLM request failed",
-                extra={"model": resolved_model, "status_code": exc.code},
+            _log_token_usage(
+                response, operation="generate_content", model=resolved_model
             )
-            raise LlmError(f"LLM request failed: {exc.message}") from exc
+            text = response.text
+            if text is None:
+                return ""
+            return text.strip()
 
+        result = await self._execute_with_retry(
+            "generate_content",
+            resolved_model,
+            _call,
+        )
         await self._apply_request_delay()
-
-        text = response.text
-        if text is None:
-            return ""
-        return text.strip()
+        return result
 
     async def generate_structured_with_grounding(
         self,
@@ -121,11 +192,11 @@ class LargeLanguageModelClient:
         user_prompt: str,
         model: str,
     ) -> tuple[object, dict | None]:
-        client = self._get_client()
         research_prompt = (
-            "Use Google Search to research the organizations, labs, professors, and "
-            "roles referenced below. Summarize only factual findings useful for writing "
-            "a tailored application email or cover letter. Do not draft the email yet.\n\n"
+            "Use Google Search to research the organizations, labs, professors, "
+            "and roles referenced below. Summarize only factual findings useful "
+            "for writing a tailored application email or cover letter. "
+            "Do not draft the email yet.\n\n"
             f"{user_prompt}"
         )
         config = types.GenerateContentConfig(
@@ -133,19 +204,17 @@ class LargeLanguageModelClient:
             tools=[types.Tool(google_search=types.GoogleSearch())],
         )
 
-        try:
-            response = await client.aio.models.generate_content(
+        async def _call() -> object:
+            client = self._get_client()
+            resp = await client.aio.models.generate_content(
                 model=model,
                 contents=research_prompt,
                 config=config,
             )
-        except genai_errors.APIError as exc:
-            logger.error(
-                "Grounding research request failed",
-                extra={"model": model, "status_code": exc.code},
-            )
-            raise LlmError(f"LLM request failed: {exc.message}") from exc
+            _log_token_usage(resp, operation="grounding", model=model)
+            return resp
 
+        response = await self._execute_with_retry("grounding", model, _call)
         await self._apply_request_delay()
         return response, _extract_grounding_metadata(response)
 
@@ -157,33 +226,46 @@ class LargeLanguageModelClient:
         response_schema: dict,
         model: str,
     ) -> dict:
-        client = self._get_client()
         config = types.GenerateContentConfig(
             system_instruction=system_instruction,
             response_mime_type="application/json",
             response_json_schema=response_schema,
         )
 
-        try:
+        async def _call() -> dict:
+            client = self._get_client()
             response = await client.aio.models.generate_content(
                 model=model,
                 contents=user_prompt,
                 config=config,
             )
-        except genai_errors.APIError as exc:
-            logger.error(
-                "Structured LLM request failed",
-                extra={"model": model, "status_code": exc.code},
-            )
-            raise LlmError(f"LLM request failed: {exc.message}") from exc
+            _log_token_usage(response, operation="structured", model=model)
+            raw_text = response.text or "{}"
+            try:
+                return json.loads(raw_text)
+            except json.JSONDecodeError:
+                return _parse_json_text(raw_text)
 
+        parsed = await self._execute_with_retry("structured", model, _call)
         await self._apply_request_delay()
+        return parsed
 
-        raw_text = response.text or "{}"
-        try:
-            return json.loads(raw_text)
-        except json.JSONDecodeError:
-            return _parse_json_text(raw_text)
+
+def _log_token_usage(response: object, *, operation: str, model: str) -> None:
+    """Log Gemini token usage from a response object when available."""
+    usage = getattr(response, "usage_metadata", None)
+    if usage is None:
+        return
+    logger.info(
+        "LLM token usage",
+        extra={
+            "operation": operation,
+            "model": model,
+            "prompt_tokens": getattr(usage, "prompt_token_count", None),
+            "candidates_tokens": getattr(usage, "candidates_token_count", None),
+            "total_tokens": getattr(usage, "total_token_count", None),
+        },
+    )
 
 
 def _extract_grounding_metadata(response: object) -> dict | None:

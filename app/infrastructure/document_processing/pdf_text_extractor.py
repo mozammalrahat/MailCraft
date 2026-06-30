@@ -1,8 +1,15 @@
 from io import BytesIO
 
 from app.core.configuration import Settings
-from app.services.errors import ServiceValidationError
+from app.core.exceptions import ServiceValidationError
 from pypdf import PdfReader
+
+_PDF_MAGIC = b"%PDF-"
+
+
+def _validate_pdf_content(filename: str, content: bytes) -> None:
+    if not content.startswith(_PDF_MAGIC):
+        raise ServiceValidationError(f"Invalid PDF file (magic bytes): {filename}")
 
 
 def extract_text_from_pdfs(
@@ -24,6 +31,8 @@ def extract_text_from_pdfs(
             raise ServiceValidationError(
                 f"File too large (max {settings.upload_max_mb}MB): {filename}"
             )
+
+        _validate_pdf_content(filename, content)
 
         reader = PdfReader(BytesIO(content))
         pages = [page.extract_text() or "" for page in reader.pages]

@@ -1,9 +1,9 @@
 from datetime import datetime
 
 from pydantic import BaseModel, Field
+from tools.evaluation.metrics.base import MetricDefinition
 
 from app.schemas.email import EmailTone
-from app.services.evaluation.metrics.base import MetricDefinition
 
 
 class Scenario(BaseModel):

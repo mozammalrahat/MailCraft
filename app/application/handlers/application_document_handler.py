@@ -1,15 +1,8 @@
 """Handler for application document generation."""
 
 from app.application.pipelines.generation_context import GenerationContext
-from app.application.pipelines.generation_pipeline import GenerationPipeline
-from app.application.pipelines.steps import (
-    ExtractResumeTextStep,
-    FormatOutputStep,
-    GroundingResearchStep,
-    HumanizeContentStep,
-    LanguageModelGenerationStep,
-    PersistGeneratedContentStep,
-    ValidateInputStep,
+from app.application.pipelines.pipeline_factory import (
+    build_application_document_pipeline,
 )
 from app.application.serializers.generated_content_serializer import (
     serialize_generated_content,
@@ -19,6 +12,7 @@ from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
 from app.domain.enums.generation_kind import GenerationKind
 from app.infrastructure.large_language_model.client import LargeLanguageModelClient
+from app.infrastructure.storage.base import FileStorage
 from app.schemas.generated_content import GeneratedContentResponse
 from sqlalchemy.orm import Session
 
@@ -27,17 +21,7 @@ class ApplicationDocumentHandler:
     """Orchestrate application document generation through the pipeline."""
 
     def __init__(self) -> None:
-        self._pipeline = GenerationPipeline(
-            steps=[
-                ValidateInputStep(),
-                ExtractResumeTextStep(),
-                GroundingResearchStep(),
-                LanguageModelGenerationStep(),
-                FormatOutputStep(),
-                HumanizeContentStep(),
-                PersistGeneratedContentStep(),
-            ]
-        )
+        self._pipeline = build_application_document_pipeline()
 
     async def generate(
         self,
@@ -52,6 +36,7 @@ class ApplicationDocumentHandler:
         database_session: Session,
         settings: Settings,
         language_model_client: LargeLanguageModelClient,
+        file_storage: FileStorage | None = None,
     ) -> GeneratedContentResponse:
         """Generate and persist an application document."""
         context = GenerationContext(
@@ -66,6 +51,7 @@ class ApplicationDocumentHandler:
             position_description=position_description,
             resume_file_payloads=resume_file_payloads,
             grounding_links=grounding_links,
+            file_storage=file_storage,
         )
         context = await self._pipeline.run(context)
         if context.generated_content is None:

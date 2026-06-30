@@ -40,7 +40,14 @@ class DatabaseEngineManager:
         connect_args = (
             {"check_same_thread": False} if resolved_url.startswith("sqlite") else {}
         )
-        self._engine = create_engine(resolved_url, connect_args=connect_args)
+        engine_kwargs: dict = {"connect_args": connect_args}
+        if resolved_url.startswith("postgresql"):
+            engine_kwargs.update(
+                pool_pre_ping=True,
+                pool_size=5,
+                max_overflow=10,
+            )
+        self._engine = create_engine(resolved_url, **engine_kwargs)
         self._session_factory = sessionmaker(
             bind=self._engine,
             autoflush=False,
@@ -81,10 +88,12 @@ def get_database_engine_manager() -> DatabaseEngineManager:
 
 
 def initialize_database() -> None:
-    """Initialize database engine and apply Alembic migrations."""
+    """Initialize database engine and optionally apply Alembic migrations."""
+    settings = get_settings()
     manager = get_database_engine_manager()
     manager.initialize()
-    run_database_migrations()
+    if settings.run_migrations_on_startup:
+        run_database_migrations()
 
 
 def reset_database_engine() -> None:

@@ -2,7 +2,7 @@
 
 from app.prompts.templates.content_humanizer import CONTENT_HUMANIZER_SYSTEM_RULES
 
-HUMANIZER_PROMPT_VERSION = "1.0.0"
+HUMANIZER_PROMPT_VERSION = "1.1.0"
 
 
 def build_content_humanizer_prompt(

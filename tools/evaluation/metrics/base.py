@@ -4,7 +4,9 @@ from pydantic import BaseModel, Field
 
 
 class MetricInput(BaseModel):
-    generated_email: str
+    """Input for evaluation metrics."""
+
+    generated_email: str  # Full clipboard text (subject + body), not body alone.
     key_facts: list[str] = Field(default_factory=list)
     tone: str = ""
     reference_email: str | None = None

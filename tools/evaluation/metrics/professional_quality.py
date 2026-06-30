@@ -1,7 +1,7 @@
 import re
 
 from app.infrastructure.large_language_model.client import LargeLanguageModelClient
-from app.services.prompts.judge_quality import build_quality_judge_prompt
+from app.prompts.builders.judge_quality_prompt_builder import build_quality_judge_prompt
 
 from tools.evaluation.metrics.base import (
     MetricDefinition,

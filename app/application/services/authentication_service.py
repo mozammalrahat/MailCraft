@@ -16,6 +16,7 @@ from app.database.models.scenario import Scenario
 from app.database.models.user import User
 from app.database.session import get_database_session
 from fastapi import Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 ACCESS_COOKIE_NAME = "access_token"
@@ -45,7 +46,9 @@ def create_access_token(user_id: int, settings: Settings) -> str:
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=JWT_ALGORITHM)
 
 
-def create_refresh_token(user_id: int, database_session: Session, settings: Settings) -> str:
+def create_refresh_token(
+    user_id: int, database_session: Session, settings: Settings
+) -> str:
     """Create and store a refresh token."""
     token_identifier = secrets.token_urlsafe(32)
     token = secrets.token_urlsafe(48)
@@ -90,6 +93,20 @@ def revoke_refresh_token(database_session: Session, token_identifier: str) -> No
     if record and record.revoked_at is None:
         record.revoked_at = datetime.now(UTC)
         database_session.commit()
+
+
+def purge_expired_tokens(database_session: Session, user_id: int) -> None:
+    """Delete expired or revoked refresh tokens for a user (housekeeping)."""
+    now = datetime.now(UTC)
+    (
+        database_session.query(RefreshToken)
+        .filter(
+            RefreshToken.user_id == user_id,
+            (RefreshToken.expires_at < now) | (RefreshToken.revoked_at.isnot(None)),
+        )
+        .delete(synchronize_session=False)
+    )
+    database_session.commit()
 
 
 def rotate_refresh_token(
@@ -139,6 +156,11 @@ def seed_default_scenarios(database_session: Session, user_id: int) -> None:
 
 def register_user(database_session: Session, email: str, password: str) -> User:
     """Register a new user and seed default scenarios."""
+    if len(password) < 8:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must be at least 8 characters",
+        )
     existing = database_session.query(User).filter(User.email == email.lower()).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -199,3 +221,27 @@ def get_optional_user(
         return get_user_from_access_token(database_session, token, settings)
     except HTTPException:
         return None
+
+
+def get_user_or_redirect(
+    request: Request,
+    database_session: Session,
+    settings: Settings,
+) -> User | RedirectResponse:
+    """Return authenticated user or redirect to login for HTML routes."""
+    token = request.cookies.get(ACCESS_COOKIE_NAME)
+    if not token:
+        return RedirectResponse("/auth/login", status_code=303)
+    try:
+        return get_user_from_access_token(database_session, token, settings)
+    except HTTPException:
+        return RedirectResponse("/auth/login", status_code=303)
+
+
+def get_authenticated_page_user(
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> User | RedirectResponse:
+    """FastAPI dependency for authenticated HTML pages."""
+    return get_user_or_redirect(request, database_session, settings)

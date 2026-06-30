@@ -5,7 +5,6 @@ import json
 from app.application.pipelines.generation_context import GenerationContext
 from app.database.models.generated_content import GeneratedContent
 from app.domain.enums.generation_kind import GenerationKind
-from app.services.errors import ServiceValidationError
 
 
 class PersistGeneratedContentStep:
@@ -13,9 +12,6 @@ class PersistGeneratedContentStep:
 
     async def process(self, context: GenerationContext) -> GenerationContext:
         """Insert a generated content row."""
-        if context.validation_errors:
-            raise ServiceValidationError(context.validation_errors[0])
-
         record = GeneratedContent(
             user_id=context.user_id,
             generation_kind=context.generation_kind.value,
@@ -24,6 +20,14 @@ class PersistGeneratedContentStep:
             raw_subject=context.raw_subject,
             raw_body=context.raw_body,
             humanization_applied=context.humanization_applied,
+            humanizer_model_name=(
+                context.humanizer_model_name if context.humanization_applied else None
+            ),
+            humanizer_prompt_version=(
+                context.humanizer_prompt_version
+                if context.humanization_applied
+                else None
+            ),
         )
 
         if context.generation_kind == GenerationKind.LEGACY_EMAIL:
@@ -43,6 +47,8 @@ class PersistGeneratedContentStep:
             record.cv_extracted_text = context.resume_text
             record.cv_filenames = context.resume_filenames
             record.grounding_links = context.grounding_links
+            if context.resume_storage_keys:
+                record.resume_storage_keys = context.resume_storage_keys
             record.document_metadata = context.document_metadata
             record.model_name = context.model_name
             if context.grounding_metadata:

@@ -15,14 +15,20 @@ dependencies = [
     "pyjwt>=2.10.0",
     "pypdf>=5.1.0",
     "python-multipart>=0.0.32",
+    "psycopg[binary]>=3.2",
     "reportlab>=4.4.0",
+    "slowapi>=0.1.9",
     "sqlalchemy>=2.0.36",
     "uvicorn[standard]>=0.49.0",
+    "boto3>=1.35.0",
+    "arq>=0.26.1",
+    "redis>=5.0.0",
 ]
 
 [project.scripts]
 mailcraft = "app.main:run"
 mailcraft-eval = "tools.evaluation.cli:main"
+mailcraft-worker = "app.worker.main:main"
 
 [dependency-groups]
 dev = [
@@ -30,6 +36,7 @@ dev = [
     "pyrefly>=1.1.0",
     "pytest>=9.1.0",
     "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
     "ruff>=0.15.18",
 ]
 
@@ -59,6 +66,25 @@ project-includes = ["app", "tests", "tools"]
 testpaths = ["tests"]
 pythonpath = ["."]
 asyncio_mode = "auto"
+addopts = "--cov=app --cov-report=term-missing --cov-report=html:htmlcov --cov-fail-under=60"
+
+[tool.coverage.run]
+source = ["app"]
+omit = [
+    "app/main.py",
+    "app/logging_config.py",
+    "*/migrations/*",
+    "alembic/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "@overload",
+]
 
 [tool.uv]
 package = true

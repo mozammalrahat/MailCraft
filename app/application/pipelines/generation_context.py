@@ -1,6 +1,7 @@
 """Shared context passed through generation pipeline steps."""
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from app.core.configuration import Settings
 from app.database.models.generated_content import GeneratedContent
@@ -11,6 +12,9 @@ from app.domain.enums.email_tone import EmailTone
 from app.domain.enums.generation_kind import GenerationKind
 from app.infrastructure.large_language_model.client import LargeLanguageModelClient
 from sqlalchemy.orm import Session
+
+if TYPE_CHECKING:
+    from app.infrastructure.storage.base import FileStorage
 
 
 @dataclass
@@ -36,6 +40,8 @@ class GenerationContext:
     position_description: str | None = None
     resume_file_payloads: list[tuple[str, bytes]] = field(default_factory=list)
     grounding_links: list[str] = field(default_factory=list)
+    file_storage: "FileStorage | None" = None
+    resume_storage_keys: list[dict[str, str]] = field(default_factory=list)
 
     # Intermediate outputs
     resume_text: str = ""

@@ -28,6 +28,10 @@ class GeneratedContent(Base):
     raw_subject: Mapped[str | None] = mapped_column(String(500), nullable=True)
     raw_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     humanization_applied: Mapped[bool] = mapped_column(default=False)
+    humanizer_model_name: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    humanizer_prompt_version: Mapped[str | None] = mapped_column(
+        String(32), nullable=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(UTC), index=True
     )
@@ -52,6 +56,7 @@ class GeneratedContent(Base):
     grounding_links_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     cv_filenames_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     cv_extracted_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resume_storage_keys_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     grounding_metadata_json: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -95,6 +100,18 @@ class GeneratedContent(Base):
     def cv_filenames(self, value: list[str]) -> None:
         """Store CV filenames as JSON."""
         self.cv_filenames_json = json.dumps(value)
+
+    @property
+    def resume_storage_keys(self) -> list[dict[str, str]]:
+        """Return parsed resume storage key metadata."""
+        if not self.resume_storage_keys_json:
+            return []
+        return json.loads(self.resume_storage_keys_json)
+
+    @resume_storage_keys.setter
+    def resume_storage_keys(self, value: list[dict[str, str]]) -> None:
+        """Store resume storage keys as JSON."""
+        self.resume_storage_keys_json = json.dumps(value)
 
     @property
     def document_metadata(self) -> dict:

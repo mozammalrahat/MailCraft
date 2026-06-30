@@ -1,7 +1,9 @@
 import logging
 from datetime import UTC, datetime
 
-from app.config import Settings
+from app.application.services.email_formatting_service import build_clipboard_text
+from app.application.services.email_generation_service import generate_email
+from app.core.configuration import Settings
 from app.infrastructure.large_language_model.client import LargeLanguageModelClient
 from app.schemas.email import EmailGenerationRequest, EmailStrategy
 from app.schemas.evaluation import (
@@ -12,7 +14,6 @@ from app.schemas.evaluation import (
     ScenarioScore,
     StrategyResult,
 )
-from app.services.email.generation import generate_email
 
 from tools.evaluation.metrics import get_all_metrics
 from tools.evaluation.metrics.base import MetricInput
@@ -65,8 +66,12 @@ async def run_evaluation(
             generation_request, language_model_client, settings
         )
 
+        clipboard = build_clipboard_text(
+            subject=generated.subject,
+            body=generated.email,
+        )
         metric_input = MetricInput(
-            generated_email=generated.email,
+            generated_email=clipboard,
             key_facts=scenario.key_facts,
             tone=scenario.tone.value,
             reference_email=scenario.reference_email,
@@ -81,7 +86,7 @@ async def run_evaluation(
             ScenarioScore(
                 scenario_id=scenario.id,
                 scores=scores,
-                generated_email=generated.email,
+                generated_email=clipboard,
             )
         )
 

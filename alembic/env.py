@@ -1,10 +1,11 @@
 from logging.config import fileConfig
 
 from alembic import context
-from app.config import get_settings
+from app.core.configuration import get_settings
 from app.database.base import Base
 from app.database.models import (  # noqa: F401
     GeneratedContent,
+    GenerationJob,
     RefreshToken,
     Scenario,
     User,

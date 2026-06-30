@@ -14,6 +14,7 @@ from app.application.pipelines.steps.language_model_generation_step import (
 from app.application.pipelines.steps.persist_generated_content_step import (
     PersistGeneratedContentStep,
 )
+from app.application.pipelines.steps.store_resume_files_step import StoreResumeFilesStep
 from app.application.pipelines.steps.validate_input_step import ValidateInputStep
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "HumanizeContentStep",
     "LanguageModelGenerationStep",
     "PersistGeneratedContentStep",
+    "StoreResumeFilesStep",
     "ValidateInputStep",
 ]

@@ -33,9 +33,8 @@ REMOVE AI TELLTALE LANGUAGE:
 - Avoid semicolons unless already present in a quoted fact.
 
 BANNED WORDS (replace or remove):
-can, may, just, very, really, literally, actually, certainly, probably, basically,
-could, maybe, crafting, imagine, skyrocket, abyss, shed light, illuminate, unveil,
-intricate, elucidate, however, harness, groundbreaking, cutting-edge, remarkable,
+crafting, imagine, skyrocket, abyss, shed light, illuminate, unveil,
+intricate, elucidate, harness, groundbreaking, cutting-edge, remarkable,
 moreover, boost, powerful, inquiries, glimpse into, stark, in summary, in closing.
 
 OUTPUT FORMAT (exactly):
