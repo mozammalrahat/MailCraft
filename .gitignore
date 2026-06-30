@@ -23,3 +23,6 @@ wheels/
 *.log
 data/mailcraft.db
 data/uploads/
+
+# Local utility scripts (not part of the app)
+supported_models.py
