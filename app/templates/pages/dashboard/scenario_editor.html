@@ -5,29 +5,46 @@
 {% block dashboard_content %}
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
   <div>
-    <h1 class="text-2xl font-bold text-slate-900">{{ scenario.name }}</h1>
-    <p class="text-sm text-slate-500 capitalize">{{ scenario.purpose }} · {{ scenario.document_type.replace('_', ' ') }}</p>
+    <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">{{ scenario.name }}</h1>
+    <p class="text-sm text-stone-500 mt-1 capitalize flex items-center gap-1.5">
+      <span class="px-2 py-0.5 rounded-lg text-xs font-semibold bg-stone-100 text-stone-600">{{ scenario.purpose }}</span>
+      <span class="text-stone-300">·</span>
+      <span>{{ scenario.document_type.replace('_', ' ') }}</span>
+    </p>
   </div>
   <div class="flex items-center gap-3">
-    <span id="save-status" class="text-sm text-slate-500">Saved</span>
-    <button type="button" id="clone-btn" class="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50">Clone</button>
+    <span id="save-status" class="text-sm text-stone-400 italic">Saved</span>
+    <button type="button" id="clone-btn"
+      class="px-3 py-1.5 text-sm font-medium rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors">Clone</button>
+    <a href="/dashboard/scenarios"
+      class="px-3 py-1.5 text-sm font-medium rounded-xl border border-stone-200 text-stone-500 hover:bg-stone-50 transition-colors">Back</a>
   </div>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-  <div>
-    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Name</label>
-    <input id="scenario-name" type="text" value="{{ scenario.name }}" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border mb-4" />
-    <label class="block text-sm font-semibold text-slate-700 mb-1.5">System Prompt (Markdown)</label>
-    <textarea id="scenario-prompt" rows="20" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border font-mono text-sm">{{ scenario.system_prompt }}</textarea>
+  <div class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">Name</label>
+      <input id="scenario-name" type="text" value="{{ scenario.name }}"
+        class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-stone-700 mb-1.5">System Prompt (Markdown)</label>
+      <textarea id="scenario-prompt" rows="22"
+        class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5 font-mono">{{ scenario.system_prompt }}</textarea>
+    </div>
   </div>
   <div>
-    <label class="block text-sm font-semibold text-slate-700 mb-1.5">Preview</label>
-    <div id="preview" class="prose prose-sm max-w-none bg-white rounded-2xl border border-slate-200 p-6 min-h-[400px]"></div>
+    <label class="block text-sm font-medium text-stone-700 mb-1.5">Preview</label>
+    <div id="preview" class="prose prose-sm max-w-none bg-white rounded-2xl border border-stone-200/80 shadow-sm p-6 min-h-[400px]"></div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"
+  integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+"
+  crossorigin="anonymous"></script>
+<script src="/static/js/dompurify.min.js"></script>
 <script>
   const scenarioId = {{ scenario.id }};
   const nameEl = document.getElementById('scenario-name');
@@ -37,7 +54,7 @@
   let saveTimer = null;
 
   function renderPreview() {
-    previewEl.innerHTML = marked.parse(promptEl.value || '');
+    previewEl.innerHTML = DOMPurify.sanitize(marked.parse(promptEl.value || ''));
   }
   promptEl.addEventListener('input', () => { renderPreview(); scheduleSave(); });
   nameEl.addEventListener('input', scheduleSave);

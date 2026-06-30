@@ -4,34 +4,37 @@
 
 {% block dashboard_content %}
 <div class="mb-8">
-  <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Generate Document</h1>
-  <p class="mt-2 text-slate-600">Interview, MS, or PhD emails and cover letters with CV grounding.</p>
+  <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Generate Document</h1>
+  <p class="mt-2 text-stone-500">Interview, MS, or PhD emails and cover letters with CV grounding.</p>
 </div>
 
-<div id="error-box" class="hidden mb-4 p-4 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-sm"></div>
+<div id="error-box" class="hidden mb-5 p-4 rounded-xl bg-red-50 text-red-700 border border-red-100 text-sm flex items-start gap-2.5">
+  <svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+  <span id="error-text"></span>
+</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
   <div class="lg:col-span-5">
-    <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 lg:sticky lg:top-24">
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-6 sm:p-7 lg:sticky lg:top-20">
       <form id="gen-form" class="space-y-5">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Purpose</label>
-            <select id="purpose" name="purpose" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border bg-white" required>
+            <label class="block text-sm font-medium text-stone-700 mb-1.5">Purpose</label>
+            <select id="purpose" name="purpose" class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5" required>
               {% for p in purposes %}<option value="{{ p }}">{{ p | title }}</option>{% endfor %}
             </select>
           </div>
           <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Document Type</label>
-            <select id="document_type" name="document_type" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border bg-white" required>
+            <label class="block text-sm font-medium text-stone-700 mb-1.5">Document Type</label>
+            <select id="document_type" name="document_type" class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5" required>
               {% for dt in document_types %}<option value="{{ dt }}">{{ dt.replace('_', ' ') | title }}</option>{% endfor %}
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Scenario</label>
-          <select id="scenario_id" name="scenario_id" class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border bg-white" required>
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">Scenario</label>
+          <select id="scenario_id" name="scenario_id" class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5" required>
             {% for s in scenarios %}
             <option value="{{ s.id }}" data-purpose="{{ s.purpose }}" data-dtype="{{ s.document_type }}">{{ s.name }}</option>
             {% endfor %}
@@ -39,25 +42,27 @@
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Position / Job Description</label>
-          <textarea id="position_description" name="position_description" rows="5" required placeholder="Paste the job posting or program description..." class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2.5 px-3 border placeholder-slate-400"></textarea>
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">Position / Job Description</label>
+          <textarea id="position_description" name="position_description" rows="5" required placeholder="Paste the job posting or program description..." class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5 placeholder-stone-400"></textarea>
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">CV / Resume (PDF)</label>
-          <input type="file" id="cv_files" name="cv_files" accept=".pdf" multiple required class="block w-full text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+          <label class="block text-sm font-medium text-stone-700 mb-1.5">CV / Resume (PDF)</label>
+          <input type="file" id="resume_files" name="resume_files" accept=".pdf" multiple required
+            class="block w-full text-sm text-stone-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-brand-50 file:text-brand-700 file:font-medium hover:file:bg-brand-100 file:transition-colors" />
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-1.5">Reference Links</label>
-          <p class="text-xs text-slate-500 mb-2">Company, lab, or professor profile URLs for Google Search grounding.</p>
+          <label class="block text-sm font-medium text-stone-700 mb-1">Reference Links</label>
+          <p class="text-xs text-stone-400 mb-2">Company, lab, or professor profile URLs for Google Search grounding.</p>
           <div id="links-container" class="space-y-2">
-            <input type="url" name="grounding_links" placeholder="https://..." class="link-input block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border placeholder-slate-400" />
+            <input type="url" name="grounding_links" placeholder="https://..." class="link-input block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5 placeholder-stone-400" />
           </div>
-          <button type="button" id="add-link" class="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium">+ Add link</button>
+          <button type="button" id="add-link" class="mt-2 text-sm text-brand-600 hover:text-brand-700 font-medium transition-colors">+ Add link</button>
         </div>
 
-        <button type="submit" id="submit-btn" class="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm transition-all">
+        <button type="submit" id="submit-btn"
+          class="w-full inline-flex items-center justify-center px-5 py-2.5 rounded-xl text-sm font-semibold bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20 hover:shadow-brand-600/30 transition-all">
           Generate Document
         </button>
       </form>
@@ -65,21 +70,33 @@
   </div>
 
   <div class="lg:col-span-7">
-    <div id="preview-empty" class="min-h-[400px] rounded-2xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-400 bg-slate-50/50 p-8 text-center">
-      <p class="text-lg font-medium text-slate-500">Your generated document will appear here.</p>
+    <div id="preview-empty" class="min-h-[400px] rounded-2xl border-2 border-dashed border-stone-200 flex flex-col items-center justify-center text-stone-400 bg-white/50 p-8 text-center">
+      <div class="w-14 h-14 rounded-2xl bg-stone-100 flex items-center justify-center mb-4">
+        <svg class="w-6 h-6 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+      </div>
+      <p class="text-base font-medium text-stone-500">Your generated document will appear here.</p>
+      <p class="text-sm mt-1 text-stone-400">Fill out the form on the left to get started.</p>
     </div>
-    <div id="preview-result" class="hidden bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-      <div class="bg-slate-50 border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between">
-        <span class="text-sm font-medium text-slate-500">Generated Document</span>
+    <div id="preview-result" class="hidden bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
+      <div class="bg-stone-50 border-b border-stone-200 px-5 py-3 flex items-center justify-between">
+        <span class="text-xs font-semibold text-stone-400 uppercase tracking-widest">Generated Document</span>
         <span id="result-badges" class="flex gap-2"></span>
       </div>
-      <div class="px-4 sm:px-6 py-3 border-b border-slate-100 space-y-2 text-sm" id="result-meta"></div>
-      <div class="p-4 sm:p-6">
-        <div id="result-body" class="whitespace-pre-wrap text-base text-slate-800 leading-relaxed font-sans"></div>
+      <div class="px-5 py-3 border-b border-stone-100 space-y-2 text-sm" id="result-meta"></div>
+      <div class="p-5 sm:p-6">
+        <div id="result-body" class="whitespace-pre-wrap text-sm text-stone-800 leading-relaxed font-sans"></div>
       </div>
-      <div class="bg-slate-50 border-t border-slate-200 px-4 sm:px-6 py-3 flex flex-wrap gap-3 justify-end">
-        <button type="button" id="copy-btn" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-white border border-slate-300 text-slate-700 hover:bg-slate-50">Copy</button>
-        <a id="pdf-btn" href="#" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Export PDF</a>
+      <div class="bg-stone-50 border-t border-stone-100 px-5 py-3 flex flex-wrap gap-3 justify-end">
+        <button type="button" id="copy-btn"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-white border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          Copy
+        </button>
+        <a id="pdf-btn" href="#"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20 transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          Export PDF
+        </a>
       </div>
     </div>
   </div>
@@ -111,7 +128,7 @@
     input.type = 'url';
     input.name = 'grounding_links';
     input.placeholder = 'https://...';
-    input.className = 'link-input block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border placeholder-slate-400';
+    input.className = 'link-input block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5 placeholder-stone-400';
     document.getElementById('links-container').appendChild(input);
     input.focus();
   });
@@ -122,9 +139,10 @@
     e.preventDefault();
     const btn = document.getElementById('submit-btn');
     const errBox = document.getElementById('error-box');
+    const errText = document.getElementById('error-text');
     errBox.classList.add('hidden');
     btn.disabled = true;
-    btn.textContent = 'Generating...';
+    btn.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...';
 
     const fd = new FormData();
     fd.append('purpose', purposeEl.value);
@@ -132,27 +150,45 @@
     fd.append('scenario_id', scenarioEl.value);
     fd.append('position_description', document.getElementById('position_description').value);
     document.querySelectorAll('.link-input').forEach(i => { if (i.value.trim()) fd.append('grounding_links', i.value.trim()); });
-    const files = document.getElementById('cv_files').files;
-    for (const f of files) fd.append('cv_files', f);
+    const files = document.getElementById('resume_files').files;
+    for (const f of files) fd.append('resume_files', f);
 
     try {
       const res = await fetch('/api/generations', { method: 'POST', body: fd, credentials: 'same-origin' });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Generation failed');
+      if (!res.ok) {
+        const detail = data.detail;
+        const msg = Array.isArray(detail)
+          ? detail.map(e => e.msg || String(e)).join('; ')
+          : (detail || 'Generation failed');
+        throw new Error(msg);
+      }
       lastResult = data;
       document.getElementById('preview-empty').classList.add('hidden');
       document.getElementById('preview-result').classList.remove('hidden');
-      document.getElementById('result-meta').innerHTML = data.subject
-        ? `<div class="flex items-start gap-2"><span class="w-16 font-medium text-slate-500 shrink-0">Subject:</span><span id="email-subject" class="text-slate-900 font-semibold">${data.subject}</span></div>`
-        : '';
+      const metaEl = document.getElementById('result-meta');
+      metaEl.replaceChildren();
+      if (data.subject) {
+        const row = document.createElement('div');
+        row.className = 'flex items-start gap-2';
+        const label = document.createElement('span');
+        label.className = 'w-16 font-medium text-stone-400 shrink-0';
+        label.textContent = 'Subject:';
+        const subject = document.createElement('span');
+        subject.id = 'email-subject';
+        subject.className = 'text-stone-900 font-semibold';
+        subject.textContent = data.subject;
+        row.append(label, subject);
+        metaEl.append(row);
+      }
       document.getElementById('result-body').textContent = data.body;
       document.getElementById('pdf-btn').href = `/api/generations/${data.id}/pdf`;
     } catch (err) {
-      errBox.textContent = err.message;
+      errText.textContent = err.message;
       errBox.classList.remove('hidden');
     } finally {
       btn.disabled = false;
-      btn.textContent = 'Generate Document';
+      btn.innerHTML = 'Generate Document';
     }
   });
 
@@ -167,9 +203,9 @@
     })();
     await navigator.clipboard.writeText(text);
     const btn = document.getElementById('copy-btn');
-    const original = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = original; }, 2000);
+    const original = btn.innerHTML;
+    btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
+    setTimeout(() => { btn.innerHTML = original; }, 2000);
   });
 </script>
 {% endblock %}

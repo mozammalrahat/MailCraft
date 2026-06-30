@@ -5,58 +5,76 @@
 {% block dashboard_content %}
 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
   <div>
-    <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Scenarios</h1>
-    <p class="mt-2 text-slate-600">Manage editable system prompts for each document type.</p>
+    <h1 class="text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">Scenarios</h1>
+    <p class="mt-2 text-stone-500">Manage editable system prompts for each document type.</p>
   </div>
-  <button type="button" id="new-scenario-btn" class="inline-flex items-center px-4 py-2.5 rounded-xl font-medium bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm">New Scenario</button>
+  <button type="button" id="new-scenario-btn"
+    class="inline-flex items-center px-4 py-2.5 text-sm font-semibold rounded-xl bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20 transition-all">
+    New Scenario
+  </button>
 </div>
 
 <div class="grid gap-4">
   {% for s in scenarios %}
-  <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h2 class="font-semibold text-slate-900">{{ s.name }}</h2>
-      <p class="text-sm text-slate-500 mt-1 capitalize">{{ s.purpose }} · {{ s.document_type.replace('_', ' ') }}</p>
+  <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:border-stone-300 transition-colors">
+    <div class="min-w-0">
+      <h2 class="font-semibold text-stone-900 truncate">{{ s.name }}</h2>
+      <p class="text-sm text-stone-500 mt-1 capitalize flex items-center gap-1.5">
+        <span class="px-2 py-0.5 rounded-lg text-xs font-semibold bg-stone-100 text-stone-600">{{ s.purpose }}</span>
+        <span class="text-stone-300">·</span>
+        <span>{{ s.document_type.replace('_', ' ') }}</span>
+      </p>
     </div>
-    <div class="flex gap-2">
-      <a href="/dashboard/scenarios/{{ s.id }}/edit" class="px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50">Edit</a>
-      <button type="button" class="clone-btn px-3 py-1.5 text-sm font-medium rounded-lg border border-slate-300 hover:bg-slate-50" data-id="{{ s.id }}">Clone</button>
+    <div class="flex gap-2 shrink-0">
+      <a href="/dashboard/scenarios/{{ s.id }}/edit"
+        class="px-3 py-1.5 text-sm font-medium rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors">Edit</a>
+      <button type="button" class="clone-btn px-3 py-1.5 text-sm font-medium rounded-xl border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors" data-id="{{ s.id }}">Clone</button>
       {% if not s.is_default %}
-      <button type="button" class="delete-btn px-3 py-1.5 text-sm font-medium rounded-lg text-rose-600 border border-rose-200 hover:bg-rose-50" data-id="{{ s.id }}">Delete</button>
+      <button type="button" class="delete-btn px-3 py-1.5 text-sm font-medium rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors" data-id="{{ s.id }}">Delete</button>
       {% endif %}
     </div>
   </div>
   {% else %}
-  <p class="text-slate-500">No scenarios found.</p>
+  <div class="text-center py-12 text-stone-400 bg-white rounded-2xl border border-stone-200/80">
+    <p class="text-base">No scenarios yet.</p>
+    <button type="button" id="new-scenario-btn-empty"
+      class="mt-3 inline-flex items-center px-4 py-2 text-sm font-semibold rounded-xl bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20">
+      Create your first scenario
+    </button>
+  </div>
   {% endfor %}
 </div>
 
 <script>
+  function createScenario() {
+    const name = prompt('Scenario name:');
+    if (!name) return;
+    const purpose = prompt('Purpose (interview, ms, phd):', 'interview');
+    const document_type = prompt('Document type (email, cover_letter):', 'email');
+    fetch('/api/scenarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({ name, purpose, document_type, system_prompt: '# Custom prompt\n\nWrite a professional document.' }),
+    }).then(() => location.reload());
+  }
+
+  document.getElementById('new-scenario-btn')?.addEventListener('click', createScenario);
+  document.getElementById('new-scenario-btn-empty')?.addEventListener('click', createScenario);
+
   document.querySelectorAll('.clone-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       await fetch(`/api/scenarios/${btn.dataset.id}/clone`, { method: 'POST', credentials: 'same-origin' });
       location.reload();
     });
   });
+
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Delete this scenario?')) return;
       await fetch(`/api/scenarios/${btn.dataset.id}`, { method: 'DELETE', credentials: 'same-origin' });
       location.reload();
     });
-  });
-  document.getElementById('new-scenario-btn')?.addEventListener('click', async () => {
-    const name = prompt('Scenario name:');
-    if (!name) return;
-    const purpose = prompt('Purpose (interview, ms, phd):', 'interview');
-    const document_type = prompt('Document type (email, cover_letter):', 'email');
-    await fetch('/api/scenarios', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ name, purpose, document_type, system_prompt: '# Custom prompt\n\nWrite a professional document.' }),
-    });
-    location.reload();
   });
 </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% macro button(text, type="submit", variant="primary", extra_class="", id="") %}
-  {% set base_class = "inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2" %}
-  {% set color = "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm hover:shadow focus:ring-indigo-500" if variant == "primary" else "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 shadow-sm focus:ring-slate-500" %}
+  {% set base_class = "inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2" %}
+  {% set color = "bg-brand-600 text-white hover:bg-brand-700 shadow-sm shadow-brand-600/20 hover:shadow-brand-600/30 focus:ring-brand-500" if variant == "primary" else "bg-white text-stone-700 border border-stone-200 hover:bg-stone-50 shadow-sm focus:ring-stone-400" %}
   <button
     {% if id %}id="{{ id }}"{% endif %}
     type="{{ type }}"
@@ -11,9 +11,9 @@
 {% endmacro %}
 
 {% macro card(title="", extra_class="") %}
-  <section class="p-6 sm:p-8 rounded-2xl shadow-sm bg-white border border-slate-200 {{ extra_class }}">
+  <section class="p-7 sm:p-8 rounded-2xl bg-white border border-stone-200/80 shadow-sm {{ extra_class }}">
     {% if title %}
-      <h2 class="text-xl font-semibold mb-6 text-slate-900 tracking-tight">{{ title }}</h2>
+      <h2 class="text-xl font-bold mb-6 text-stone-900 tracking-tight">{{ title }}</h2>
     {% endif %}
     {{ caller() }}
   </section>
@@ -21,14 +21,14 @@
 
 {% macro form_field(label, name, field_type="text", value="", placeholder="", required=true, rows=1) %}
   <div class="space-y-1.5">
-    <label for="{{ name }}" class="block text-sm font-semibold text-slate-700">{{ label }}</label>
+    <label for="{{ name }}" class="block text-sm font-medium text-stone-700">{{ label }}</label>
     {% if field_type == "textarea" %}
       <textarea
         id="{{ name }}"
         name="{{ name }}"
         rows="{{ rows }}"
         placeholder="{{ placeholder }}"
-        class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors py-2.5 px-3 border placeholder-slate-400"
+        class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5 placeholder-stone-400 transition-colors"
         {% if required %}required{% endif %}
       >{{ value }}</textarea>
     {% else %}
@@ -38,7 +38,7 @@
         name="{{ name }}"
         value="{{ value }}"
         placeholder="{{ placeholder }}"
-        class="block w-full rounded-xl border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm transition-colors py-2.5 px-3 border placeholder-slate-400"
+        class="block w-full rounded-xl border border-stone-200 bg-stone-50/50 shadow-sm focus:border-brand-400 focus:ring-2 focus:ring-brand-100 text-sm py-2.5 px-3.5 placeholder-stone-400 transition-colors"
         {% if required %}required{% endif %}
       />
     {% endif %}
@@ -46,8 +46,8 @@
 {% endmacro %}
 
 {% macro tone_badge(tone) %}
-  {% set tone_color = 'bg-emerald-100 text-emerald-800 border-emerald-200' if tone == 'formal' else 'bg-sky-100 text-sky-800 border-sky-200' if tone == 'casual' else 'bg-rose-100 text-rose-800 border-rose-200' if tone == 'urgent' else 'bg-violet-100 text-violet-800 border-violet-200' %}
-  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border {{ tone_color }}">
+  {% set tone_color = 'bg-emerald-50 text-emerald-700 border-emerald-200' if tone == 'formal' else 'bg-sky-50 text-sky-700 border-sky-200' if tone == 'casual' else 'bg-red-50 text-red-700 border-red-200' if tone == 'urgent' else 'bg-violet-50 text-violet-700 border-violet-200' %}
+  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border {{ tone_color }}">
     {{ tone | title }}
   </span>
 {% endmacro %}

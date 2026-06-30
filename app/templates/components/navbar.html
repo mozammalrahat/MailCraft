@@ -1,21 +1,23 @@
-<nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2 group">
-      <div class="bg-indigo-600 text-white p-1.5 rounded-lg group-hover:bg-indigo-700 transition-colors shadow-sm">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+<nav class="sticky top-0 z-50 glass border-b border-stone-200/60">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 group">
+      <div class="relative">
+        <div class="absolute inset-0 bg-brand-500 rounded-xl blur-sm opacity-40 group-hover:opacity-60 transition-opacity"></div>
+        <div class="relative bg-gradient-to-br from-brand-600 to-brand-700 text-white p-2 rounded-xl shadow-sm">
+          <svg class="w-4.5 h-4.5" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        </div>
       </div>
-      <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-sky-500 tracking-tight">MailCraft</span>
+      <span class="text-lg font-bold tracking-tight text-stone-900">Mail<span class="text-brand-600">Craft</span></span>
     </a>
-    <div class="flex items-center gap-4 sm:gap-6 text-sm font-medium">
-      <a href="/" class="text-slate-600 hover:text-indigo-600 transition-colors hidden sm:inline">Home</a>
-      <a href="/generate" class="text-slate-600 hover:text-indigo-600 transition-colors">Quick Email</a>
+    <div class="flex items-center gap-2 sm:gap-5 text-sm font-medium">
+      <a href="/" class="text-stone-500 hover:text-stone-900 transition-colors hidden sm:inline px-2 py-1">Home</a>
+      <a href="/generate" class="text-stone-500 hover:text-stone-900 transition-colors px-2 py-1">Quick Email</a>
       {% if user is defined and user %}
-        <a href="/dashboard" class="text-slate-600 hover:text-indigo-600 transition-colors">Dashboard</a>
-        <a href="/dashboard/scenarios" class="text-slate-600 hover:text-indigo-600 transition-colors hidden sm:inline">Scenarios</a>
-        <a href="/dashboard/generate" class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">New Document</a>
+        <a href="/dashboard" class="text-stone-500 hover:text-stone-900 transition-colors px-2 py-1">Dashboard</a>
+        <a href="/dashboard/scenarios" class="text-stone-500 hover:text-stone-900 transition-colors hidden sm:inline px-2 py-1">Scenarios</a>
       {% else %}
-        <a href="/auth/login" class="text-slate-600 hover:text-indigo-600 transition-colors">Sign In</a>
-        <a href="/auth/register" class="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg transition-colors shadow-sm">Register</a>
+        <a href="/auth/login" class="text-stone-500 hover:text-stone-900 transition-colors px-2 py-1">Sign In</a>
+        <a href="/auth/register" class="ml-1 px-4 py-2 bg-stone-900 text-white hover:bg-stone-800 rounded-lg transition-all shadow-sm">Get Started</a>
       {% endif %}
     </div>
   </div>
