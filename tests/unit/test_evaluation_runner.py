@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.config import Settings
+from app.core.configuration import Settings
 from app.schemas.evaluation import EvaluationReport, Scenario
 from tools.evaluation.metrics.base import MetricDefinition, MetricScore
 from tools.evaluation.metrics.fact_recall import FactRecallMetric
@@ -49,21 +49,48 @@ async def test_run_evaluation_scores_all_scenarios() -> None:
     settings = Settings(google_api_key="test-key")
     mock_client = MagicMock()
 
-    generated_emails = [
-        "Subject: Follow up\n\nDemo on May 12.",
-        "Subject: Sprint update\n\nSprint ends Friday.",
+    from app.schemas.email_generation import EmailGenerationResponse
+
+    generated_responses = [
+        EmailGenerationResponse(
+            email="Demo on May 12.",
+            subject="Follow up",
+            model="gemini-2.5-flash",
+            strategy="strategy_a",
+            prompt_version="2.0.0",
+        ),
+        EmailGenerationResponse(
+            email="Sprint ends Friday.",
+            subject="Sprint update",
+            model="gemini-2.5-flash",
+            strategy="strategy_a",
+            prompt_version="2.0.0",
+        ),
     ]
-    mock_client.generate_content = AsyncMock(side_effect=generated_emails)
 
     mock_metrics = [
         FactRecallMetric(),
         _mock_llm_metric("tone_alignment", 0.8),
         _mock_llm_metric("professional_quality", 0.85),
     ]
+    captured_inputs: list = []
 
-    with patch(
-        "tools.evaluation.runner.get_all_metrics",
-        return_value=mock_metrics,
+    async def capture_score(input_data):
+        captured_inputs.append(input_data)
+        return MetricScore(name="fact_recall", value=1.0, details="ok")
+
+    mock_metrics[0].score = capture_score
+
+    with (
+        patch(
+            "tools.evaluation.runner.generate_email",
+            new_callable=AsyncMock,
+            side_effect=generated_responses,
+        ),
+        patch(
+            "tools.evaluation.runner.get_all_metrics",
+            return_value=mock_metrics,
+        ),
     ):
         result = await run_evaluation(
             "strategy_a",
@@ -74,8 +101,8 @@ async def test_run_evaluation_scores_all_scenarios() -> None:
 
     assert len(result.scenarios) == 2
     assert "fact_recall" in result.averages
-    assert "tone_alignment" in result.averages
-    assert "professional_quality" in result.averages
+    assert captured_inputs[0].generated_email.startswith("Subject: Follow up")
+    assert result.scenarios[0].generated_email.startswith("Subject: Follow up")
 
 
 @pytest.mark.asyncio

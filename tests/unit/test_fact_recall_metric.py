@@ -49,3 +49,15 @@ async def test_fact_recall_no_facts(metric: FactRecallMetric) -> None:
         MetricInput(generated_email="Subject: Test\n\nBody", key_facts=[])
     )
     assert result.value == 1.0
+
+
+@pytest.mark.asyncio
+async def test_fact_recall_fact_in_subject_only(metric: FactRecallMetric) -> None:
+    result = await metric.score(
+        MetricInput(
+            generated_email="Subject: Demo on May 12\n\nDear team,\n\nQuick update.",
+            key_facts=["Demo on May 12"],
+        )
+    )
+
+    assert result.value == 1.0

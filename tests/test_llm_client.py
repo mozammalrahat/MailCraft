@@ -1,14 +1,18 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.config import Settings
-from app.services.errors import LlmError
-from app.services.llm.client import LlmClient, _parse_json_text
+from app.core.configuration import Settings
+from app.core.exceptions import LlmError
+from app.infrastructure.large_language_model.client import (
+    LargeLanguageModelClient,
+    _parse_json_text,
+)
+from google.genai import errors as genai_errors
 
 
 @pytest.mark.asyncio
 async def test_generate_content_raises_without_api_key() -> None:
-    client = LlmClient(Settings(google_api_key=""))
+    client = LargeLanguageModelClient(Settings(google_api_key=""))
 
     with pytest.raises(LlmError, match="API key"):
         await client.generate_content("test prompt")
@@ -17,7 +21,7 @@ async def test_generate_content_raises_without_api_key() -> None:
 @pytest.mark.asyncio
 async def test_generate_content_applies_request_delay() -> None:
     settings = Settings(google_api_key="test-key", GOOGLE_MODEL_A="gemini-test")
-    client = LlmClient(settings, request_delay_seconds=0.05)
+    client = LargeLanguageModelClient(settings, request_delay_seconds=0.05)
 
     mock_response = MagicMock()
     mock_response.text = "generated"
@@ -44,7 +48,7 @@ async def test_generate_content_applies_request_delay() -> None:
 @pytest.mark.asyncio
 async def test_structured_without_search_uses_single_json_call() -> None:
     settings = Settings(google_api_key="test-key", GOOGLE_MODEL_A="gemini-test")
-    client = LlmClient(settings, request_delay_seconds=0)
+    client = LargeLanguageModelClient(settings, request_delay_seconds=0)
 
     structured_response = MagicMock()
     structured_response.text = '{"subject":"Hi","body":"Hello","metadata":{}}'
@@ -73,7 +77,7 @@ async def test_structured_without_search_uses_single_json_call() -> None:
 @pytest.mark.asyncio
 async def test_structured_with_search_uses_two_phase_calls() -> None:
     settings = Settings(google_api_key="test-key", GOOGLE_MODEL_A="gemini-test")
-    client = LlmClient(settings, request_delay_seconds=0)
+    client = LargeLanguageModelClient(settings, request_delay_seconds=0)
 
     research_response = MagicMock()
     research_response.text = "Acme Corp builds ML platforms."
@@ -114,3 +118,84 @@ async def test_structured_with_search_uses_two_phase_calls() -> None:
 def test_parse_json_text_strips_markdown_fence() -> None:
     parsed = _parse_json_text('```json\n{"subject":"Hi","body":"Hello"}\n```')
     assert parsed["subject"] == "Hi"
+
+
+@pytest.mark.asyncio
+async def test_generate_content_retries_transient_error() -> None:
+    settings = Settings(
+        google_api_key="test-key",
+        GOOGLE_MODEL_A="gemini-test",
+        llm_max_retries=3,
+        llm_retry_base_delay_seconds=0.0,
+    )
+    client = LargeLanguageModelClient(settings, request_delay_seconds=0)
+
+    mock_response = MagicMock()
+    mock_response.text = "generated"
+
+    transient_error = genai_errors.APIError(429, {"message": "rate limited"})
+    mock_aio = MagicMock()
+    mock_aio.models.generate_content = AsyncMock(
+        side_effect=[transient_error, mock_response]
+    )
+    mock_genai_client = MagicMock()
+    mock_genai_client.aio = mock_aio
+
+    with patch.object(client, "_get_client", return_value=mock_genai_client):
+        result = await client.generate_content("test prompt")
+
+    assert result == "generated"
+    assert mock_aio.models.generate_content.await_count == 2
+
+
+@pytest.mark.asyncio
+async def test_generate_content_does_not_retry_client_error() -> None:
+    settings = Settings(
+        google_api_key="test-key",
+        GOOGLE_MODEL_A="gemini-test",
+        llm_max_retries=3,
+        llm_retry_base_delay_seconds=0.0,
+    )
+    client = LargeLanguageModelClient(settings, request_delay_seconds=0)
+
+    client_error = genai_errors.APIError(400, {"message": "bad request"})
+    mock_aio = MagicMock()
+    mock_aio.models.generate_content = AsyncMock(side_effect=client_error)
+    mock_genai_client = MagicMock()
+    mock_genai_client.aio = mock_aio
+
+    with patch.object(client, "_get_client", return_value=mock_genai_client):
+        with pytest.raises(LlmError, match="LLM request failed"):
+            await client.generate_content("test prompt")
+
+    assert mock_aio.models.generate_content.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_generate_content_logs_latency() -> None:
+    settings = Settings(
+        google_api_key="test-key",
+        GOOGLE_MODEL_A="gemini-test",
+        llm_max_retries=1,
+    )
+    client = LargeLanguageModelClient(settings, request_delay_seconds=0)
+
+    mock_response = MagicMock()
+    mock_response.text = "generated"
+    mock_aio = MagicMock()
+    mock_aio.models.generate_content = AsyncMock(return_value=mock_response)
+    mock_genai_client = MagicMock()
+    mock_genai_client.aio = mock_aio
+
+    with (
+        patch.object(client, "_get_client", return_value=mock_genai_client),
+        patch(
+            "app.infrastructure.large_language_model.client.logger.info"
+        ) as info_mock,
+    ):
+        await client.generate_content("test prompt")
+
+    info_mock.assert_called()
+    assert info_mock.call_args.args[0] == "LLM call completed"
+    assert info_mock.call_args.kwargs["extra"]["operation"] == "generate_content"
+    assert info_mock.call_args.kwargs["extra"]["success"] is True

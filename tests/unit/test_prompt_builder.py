@@ -1,3 +1,5 @@
+import pytest
+from app.application.services.email_generation_service import build_prompt
 from app.schemas.email import EmailGenerationRequest
 
 
@@ -13,8 +15,6 @@ def _sample_request() -> EmailGenerationRequest:
 
 
 def test_build_prompt_includes_all_inputs_strategy_a() -> None:
-    from app.services.email.prompt_builder import build_prompt
-
     request = _sample_request()
     prompt = build_prompt(request, strategy="strategy_a")
 
@@ -25,8 +25,6 @@ def test_build_prompt_includes_all_inputs_strategy_a() -> None:
 
 
 def test_build_prompt_includes_all_inputs_strategy_b() -> None:
-    from app.services.email.prompt_builder import build_prompt
-
     request = _sample_request()
     prompt = build_prompt(request, strategy="strategy_b")
 
@@ -37,8 +35,6 @@ def test_build_prompt_includes_all_inputs_strategy_b() -> None:
 
 
 def test_strategy_a_includes_few_shot_examples() -> None:
-    from app.services.email.prompt_builder import build_prompt
-
     request = _sample_request()
     prompt = build_prompt(request, strategy="strategy_a")
 
@@ -48,8 +44,6 @@ def test_strategy_a_includes_few_shot_examples() -> None:
 
 
 def test_strategy_b_is_zero_shot_baseline() -> None:
-    from app.services.email.prompt_builder import build_prompt
-
     request = _sample_request()
     prompt = build_prompt(request, strategy="strategy_b")
 
@@ -59,9 +53,6 @@ def test_strategy_b_is_zero_shot_baseline() -> None:
 
 
 def test_unsupported_strategy_raises() -> None:
-    import pytest
-    from app.services.email.prompt_builder import build_prompt
-
     request = _sample_request()
 
     with pytest.raises(ValueError, match="Unsupported strategy"):

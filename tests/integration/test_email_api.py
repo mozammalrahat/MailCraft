@@ -61,7 +61,7 @@ def test_generate_email_api_missing_api_key(authenticated_client: TestClient) ->
     from app.api.dependencies.large_language_model import (
         get_large_language_model_client,
     )
-    from app.config import Settings, get_settings
+    from app.core.configuration import Settings, get_settings
     from app.infrastructure.large_language_model.client import LargeLanguageModelClient
     from app.main import app
 

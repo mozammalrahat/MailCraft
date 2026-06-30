@@ -1,9 +1,14 @@
-from app.db.models import Scenario, get_session_factory
-from app.services.auth_service import hash_password, register_user, verify_password
+from app.application.services.authentication_service import (
+    hash_password,
+    register_user,
+    verify_password,
+)
+from app.database.engine_manager import get_database_engine_manager
+from app.database.models.scenario import Scenario
 
 
 def test_register_user_creates_default_scenarios() -> None:
-    factory = get_session_factory()
+    factory = get_database_engine_manager().get_session_factory()
     db = factory()
     try:
         user = register_user(db, "test@example.com", "password123")

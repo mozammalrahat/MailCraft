@@ -1,7 +1,8 @@
 from io import BytesIO
 from unittest.mock import AsyncMock, patch
 
-from app.db.models import Scenario, get_session_factory
+from app.database.engine_manager import get_database_engine_manager
+from app.database.models.scenario import Scenario
 from reportlab.pdfgen import canvas
 
 
@@ -24,7 +25,7 @@ def _register(client) -> None:
 def test_create_generation_persists_document(client) -> None:
     _register(client)
 
-    factory = get_session_factory()
+    factory = get_database_engine_manager().get_session_factory()
     db = factory()
     try:
         scenario = (

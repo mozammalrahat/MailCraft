@@ -1,10 +1,10 @@
-from app.services.prompts._tone import get_tone_guidance
-from app.services.prompts.judge_quality import build_quality_judge_prompt
-from app.services.prompts.judge_tone import build_tone_judge_prompt
-from app.services.prompts.strategy_a import build_strategy_a_prompt
-from app.services.prompts.strategy_b import build_strategy_b_prompt
-from app.services.prompts.templates.strategy_a import STRATEGY_A_TEMPLATE
-from app.services.prompts.templates.strategy_b import STRATEGY_B_TEMPLATE
+from app.prompts.builders.judge_quality_prompt_builder import build_quality_judge_prompt
+from app.prompts.builders.judge_tone_prompt_builder import build_tone_judge_prompt
+from app.prompts.builders.strategy_a_prompt_builder import build_strategy_a_prompt
+from app.prompts.builders.strategy_b_prompt_builder import build_strategy_b_prompt
+from app.prompts.builders.tone_guidance import get_tone_guidance
+from app.prompts.templates.strategy_a import STRATEGY_A_TEMPLATE
+from app.prompts.templates.strategy_b import STRATEGY_B_TEMPLATE
 
 
 def test_strategy_b_template_uses_placeholders_only() -> None:

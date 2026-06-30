@@ -1,4 +1,4 @@
-from app.config import Settings
+from app.core.configuration import Settings
 
 
 def test_settings_reads_models_from_env() -> None:
