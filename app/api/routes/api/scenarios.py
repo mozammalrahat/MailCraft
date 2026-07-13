@@ -1,7 +1,7 @@
-
 from app.api.dependencies.authentication import CurrentUserDependency
 from app.api.dependencies.database import DatabaseSessionDependency
 from app.application.services.scenario_service import ScenarioService
+from app.database.models.scenario import Scenario
 from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
 from app.schemas.scenario import (
@@ -20,7 +20,7 @@ def list_scenarios(
     current_user: CurrentUserDependency,
     purpose: ApplicationPurpose | None = None,
     document_type: DocumentType | None = None,
-) -> list[ScenarioResponse]:
+) -> list[Scenario]:
     service = ScenarioService(database_session)
     return service.list_for_user(
         current_user.id,
@@ -34,7 +34,7 @@ def create_scenario(
     payload: ScenarioCreateRequest,
     database_session: DatabaseSessionDependency,
     current_user: CurrentUserDependency,
-) -> ScenarioResponse:
+) -> Scenario:
     service = ScenarioService(database_session)
     return service.create(current_user.id, payload)
 
@@ -45,7 +45,7 @@ def update_scenario(
     payload: ScenarioUpdateRequest,
     database_session: DatabaseSessionDependency,
     current_user: CurrentUserDependency,
-) -> ScenarioResponse:
+) -> Scenario:
     service = ScenarioService(database_session)
     return service.update_owned(current_user.id, scenario_id, payload)
 
@@ -56,7 +56,7 @@ def clone_scenario(
     database_session: DatabaseSessionDependency,
     current_user: CurrentUserDependency,
     name: str | None = Query(default=None),
-) -> ScenarioResponse:
+) -> Scenario:
     service = ScenarioService(database_session)
     return service.clone_owned(current_user.id, scenario_id, name=name)
 

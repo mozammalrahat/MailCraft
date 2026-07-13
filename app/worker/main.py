@@ -1,6 +1,5 @@
 """Background generation worker entrypoint."""
 
-import asyncio
 import base64
 import json
 import logging
@@ -45,7 +44,7 @@ async def process_generation_job(ctx: dict, job_id: str) -> dict[str, str | int 
 
         if job.status == GenerationJobStatus.COMPLETED.value:
             logger.info("Job already completed, skipping", extra={"job_id": job_id})
-            return {"job_id": job_id, "generation_id": job.generation_id}
+            return {"job_id": job_id, "generation_id": job.result_generation_id}
 
         job_service.mark_running(job)
         payload = json.loads(job.payload_json)
@@ -101,7 +100,7 @@ async def process_generation_job(ctx: dict, job_id: str) -> dict[str, str | int 
         session.close()
 
 
-async def run_worker() -> None:
+def run_worker() -> None:
     """Run the ARQ worker process."""
     from arq import run_worker as arq_run_worker
     from arq.connections import RedisSettings
@@ -113,7 +112,7 @@ async def run_worker() -> None:
         on_startup = startup
         redis_settings = RedisSettings.from_dsn(settings.redis_url)
 
-    await arq_run_worker(WorkerSettings)
+    arq_run_worker(WorkerSettings)  # type: ignore[arg-type]
 
 
 def main() -> None:
@@ -121,4 +120,4 @@ def main() -> None:
     from app.core.logging.setup import configure_logging
 
     configure_logging(settings=get_settings())
-    asyncio.run(run_worker())
+    run_worker()

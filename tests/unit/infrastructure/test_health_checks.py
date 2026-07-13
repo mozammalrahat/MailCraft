@@ -1,18 +1,13 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.core.configuration import Settings
 from app.infrastructure.health.checks import run_readiness_checks
+from tests.support.settings_factory import build_test_settings
 
 
 @pytest.mark.asyncio
 async def test_run_readiness_checks_database_ok() -> None:
-    settings = Settings(
-        GOOGLE_MODEL_A="gemini-test",
-        GOOGLE_MODEL_B="gemini-test",
-        GOOGLE_JUDGE_MODEL="gemini-test",
-        health_check_llm_enabled=False,
-    )
+    settings = build_test_settings(health_check_llm_enabled=False)
     mock_client = MagicMock()
 
     with patch(
@@ -28,11 +23,7 @@ async def test_run_readiness_checks_database_ok() -> None:
 
 @pytest.mark.asyncio
 async def test_run_readiness_checks_database_fail() -> None:
-    settings = Settings(
-        GOOGLE_MODEL_A="gemini-test",
-        GOOGLE_MODEL_B="gemini-test",
-        GOOGLE_JUDGE_MODEL="gemini-test",
-    )
+    settings = build_test_settings()
 
     with patch(
         "app.infrastructure.health.checks.check_database",
@@ -46,12 +37,7 @@ async def test_run_readiness_checks_database_fail() -> None:
 
 @pytest.mark.asyncio
 async def test_run_readiness_checks_llm_fail_is_degraded() -> None:
-    settings = Settings(
-        GOOGLE_MODEL_A="gemini-test",
-        GOOGLE_MODEL_B="gemini-test",
-        GOOGLE_JUDGE_MODEL="gemini-test",
-        health_check_llm_enabled=True,
-    )
+    settings = build_test_settings(health_check_llm_enabled=True)
     mock_client = MagicMock()
     mock_client.generate_content = AsyncMock(side_effect=RuntimeError("llm down"))
 

@@ -33,9 +33,7 @@ def match_fact_in_text(fact: str, text: str) -> float:
     text_tokens = _token_set(text)
     overlap = len(fact_tokens & text_tokens) / len(fact_tokens)
 
-    substring_score = SequenceMatcher(
-        None, normalized_fact, normalized_text
-    ).ratio()
+    substring_score = SequenceMatcher(None, normalized_fact, normalized_text).ratio()
 
     return max(overlap, substring_score)
 

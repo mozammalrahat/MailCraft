@@ -1,7 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from app.core.configuration import Settings
 from app.core.exceptions import LlmError
 from app.infrastructure.large_language_model.client import (
     LargeLanguageModelClient,
@@ -9,10 +8,12 @@ from app.infrastructure.large_language_model.client import (
 )
 from google.genai import errors as genai_errors
 
+from tests.support.settings_factory import build_test_settings
+
 
 @pytest.mark.asyncio
 async def test_generate_content_raises_without_api_key() -> None:
-    client = LargeLanguageModelClient(Settings(google_api_key=""))
+    client = LargeLanguageModelClient(build_test_settings(google_api_key=""))
 
     with pytest.raises(LlmError, match="API key"):
         await client.generate_content("test prompt")
@@ -20,7 +21,7 @@ async def test_generate_content_raises_without_api_key() -> None:
 
 @pytest.mark.asyncio
 async def test_generate_content_applies_request_delay() -> None:
-    settings = Settings(google_api_key="test-key", GOOGLE_MODEL_A="gemini-test")
+    settings = build_test_settings()
     client = LargeLanguageModelClient(settings, request_delay_seconds=0.05)
 
     mock_response = MagicMock()
@@ -47,7 +48,7 @@ async def test_generate_content_applies_request_delay() -> None:
 
 @pytest.mark.asyncio
 async def test_structured_without_search_uses_single_json_call() -> None:
-    settings = Settings(google_api_key="test-key", GOOGLE_MODEL_A="gemini-test")
+    settings = build_test_settings()
     client = LargeLanguageModelClient(settings, request_delay_seconds=0)
 
     structured_response = MagicMock()
@@ -76,7 +77,7 @@ async def test_structured_without_search_uses_single_json_call() -> None:
 
 @pytest.mark.asyncio
 async def test_structured_with_search_uses_two_phase_calls() -> None:
-    settings = Settings(google_api_key="test-key", GOOGLE_MODEL_A="gemini-test")
+    settings = build_test_settings()
     client = LargeLanguageModelClient(settings, request_delay_seconds=0)
 
     research_response = MagicMock()
@@ -122,9 +123,7 @@ def test_parse_json_text_strips_markdown_fence() -> None:
 
 @pytest.mark.asyncio
 async def test_generate_content_retries_transient_error() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
+    settings = build_test_settings(
         llm_max_retries=3,
         llm_retry_base_delay_seconds=0.0,
     )
@@ -150,9 +149,7 @@ async def test_generate_content_retries_transient_error() -> None:
 
 @pytest.mark.asyncio
 async def test_generate_content_does_not_retry_client_error() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
+    settings = build_test_settings(
         llm_max_retries=3,
         llm_retry_base_delay_seconds=0.0,
     )
@@ -173,9 +170,7 @@ async def test_generate_content_does_not_retry_client_error() -> None:
 
 @pytest.mark.asyncio
 async def test_generate_content_logs_latency() -> None:
-    settings = Settings(
-        google_api_key="test-key",
-        GOOGLE_MODEL_A="gemini-test",
+    settings = build_test_settings(
         llm_max_retries=1,
     )
     client = LargeLanguageModelClient(settings, request_delay_seconds=0)

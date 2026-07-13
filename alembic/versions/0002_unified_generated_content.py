@@ -39,9 +39,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        "ix_generated_contents_user_id", "generated_contents", ["user_id"]
-    )
+    op.create_index("ix_generated_contents_user_id", "generated_contents", ["user_id"])
     op.create_index(
         "ix_generated_contents_generation_kind",
         "generated_contents",
@@ -50,9 +48,7 @@ def upgrade() -> None:
     op.create_index(
         "ix_generated_contents_scenario_id", "generated_contents", ["scenario_id"]
     )
-    op.create_index(
-        "ix_generated_contents_purpose", "generated_contents", ["purpose"]
-    )
+    op.create_index("ix_generated_contents_purpose", "generated_contents", ["purpose"])
     op.create_index(
         "ix_generated_contents_document_type",
         "generated_contents",
@@ -62,7 +58,7 @@ def upgrade() -> None:
         "ix_generated_contents_created_at", "generated_contents", ["created_at"]
     )
 
-  # Migrate existing application documents
+    # Migrate existing application documents
     op.execute(
         sa.text(
             """
@@ -87,7 +83,9 @@ def upgrade() -> None:
         "ix_generated_documents_document_type", table_name="generated_documents"
     )
     op.drop_index("ix_generated_documents_purpose", table_name="generated_documents")
-    op.drop_index("ix_generated_documents_scenario_id", table_name="generated_documents")
+    op.drop_index(
+        "ix_generated_documents_scenario_id", table_name="generated_documents"
+    )
     op.drop_index("ix_generated_documents_user_id", table_name="generated_documents")
     op.drop_table("generated_documents")
 

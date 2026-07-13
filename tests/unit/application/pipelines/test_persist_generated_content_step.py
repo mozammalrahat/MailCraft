@@ -5,10 +5,10 @@ from app.application.pipelines.generation_context import GenerationContext
 from app.application.pipelines.steps.persist_generated_content_step import (
     PersistGeneratedContentStep,
 )
-from app.core.configuration import Settings
 from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
 from app.domain.enums.generation_kind import GenerationKind
+from tests.support.settings_factory import build_test_settings
 
 
 @pytest.mark.asyncio
@@ -17,10 +17,7 @@ async def test_persist_generated_content_stores_humanizer_metadata() -> None:
     context = GenerationContext(
         user_id=1,
         generation_kind=GenerationKind.APPLICATION_DOCUMENT,
-        settings=Settings(
-            google_api_key="test-key",
-            GOOGLE_MODEL_A="gemini-test",
-        ),
+        settings=build_test_settings(),
         database_session=database_session,
         language_model_client=MagicMock(),
         purpose=ApplicationPurpose.INTERVIEW,
@@ -52,10 +49,7 @@ async def test_persist_generated_content_omits_humanizer_metadata_on_fallback() 
     context = GenerationContext(
         user_id=1,
         generation_kind=GenerationKind.APPLICATION_DOCUMENT,
-        settings=Settings(
-            google_api_key="test-key",
-            GOOGLE_MODEL_A="gemini-test",
-        ),
+        settings=build_test_settings(),
         database_session=database_session,
         language_model_client=MagicMock(),
         purpose=ApplicationPurpose.INTERVIEW,

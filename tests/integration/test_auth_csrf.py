@@ -1,5 +1,7 @@
 """HTML auth flows with CSRF protection enabled."""
 
+from collections.abc import Iterator
+
 import pytest
 from app.core.configuration import get_settings
 from app.database.engine_manager import initialize_database, reset_database_engine
@@ -8,7 +10,7 @@ from fastapi.testclient import TestClient
 
 
 @pytest.fixture
-def csrf_client(monkeypatch: pytest.MonkeyPatch, tmp_path) -> TestClient:
+def csrf_client(monkeypatch: pytest.MonkeyPatch, tmp_path) -> Iterator[TestClient]:
     db_file = tmp_path / "csrf-auth.db"
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{db_file}")
     monkeypatch.setenv("UPLOAD_DIR", str(tmp_path / "uploads"))

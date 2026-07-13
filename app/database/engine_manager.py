@@ -26,7 +26,9 @@ class DatabaseEngineManager:
             cls._instance = cls()
         return cls._instance
 
-    def initialize(self, database_url: str | None = None, upload_dir: str | None = None) -> None:
+    def initialize(
+        self, database_url: str | None = None, upload_dir: str | None = None
+    ) -> None:
         """Create engine, session factory, and required directories."""
         settings = get_settings()
         resolved_url = database_url or settings.database_url

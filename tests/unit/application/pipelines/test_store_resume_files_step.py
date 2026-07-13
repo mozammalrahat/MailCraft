@@ -1,17 +1,16 @@
+from unittest.mock import MagicMock
+
 import pytest
 from app.application.pipelines.generation_context import GenerationContext
 from app.application.pipelines.steps.store_resume_files_step import StoreResumeFilesStep
-from app.core.configuration import Settings
 from app.domain.enums.generation_kind import GenerationKind
 from app.infrastructure.storage.local_file_storage import LocalFileStorage
+from tests.support.settings_factory import build_test_settings
 
 
 @pytest.mark.asyncio
 async def test_store_resume_files_step_persists_when_enabled(tmp_path) -> None:
-    settings = Settings(
-        GOOGLE_MODEL_A="gemini-test",
-        GOOGLE_MODEL_B="gemini-test",
-        GOOGLE_JUDGE_MODEL="gemini-test",
+    settings = build_test_settings(
         upload_dir=str(tmp_path / "uploads"),
         store_uploaded_resumes=True,
     )
@@ -20,8 +19,8 @@ async def test_store_resume_files_step_persists_when_enabled(tmp_path) -> None:
         user_id=3,
         generation_kind=GenerationKind.APPLICATION_DOCUMENT,
         settings=settings,
-        database_session=None,
-        language_model_client=None,
+        database_session=MagicMock(),
+        language_model_client=MagicMock(),
         resume_file_payloads=[("cv.pdf", b"%PDF-1.4 cv")],
         file_storage=storage,
     )

@@ -13,7 +13,9 @@ depends_on: str | Sequence[str] | None = None
 
 def upgrade() -> None:
     with op.batch_alter_table("generated_contents") as batch_op:
-        batch_op.add_column(sa.Column("raw_subject", sa.String(length=500), nullable=True))
+        batch_op.add_column(
+            sa.Column("raw_subject", sa.String(length=500), nullable=True)
+        )
         batch_op.add_column(sa.Column("raw_body", sa.Text(), nullable=True))
         batch_op.add_column(
             sa.Column(

@@ -22,9 +22,18 @@ class Settings(BaseSettings):
     port: int = Field(default=8081, validation_alias="PORT")
     google_api_key: str = ""
 
-    google_model_a: str = Field(validation_alias="GOOGLE_MODEL_A")
-    google_model_b: str = Field(validation_alias="GOOGLE_MODEL_B")
-    google_judge_model: str = Field(validation_alias="GOOGLE_JUDGE_MODEL")
+    google_model_a: str = Field(
+        default="",
+        validation_alias="GOOGLE_MODEL_A",
+    )
+    google_model_b: str = Field(
+        default="",
+        validation_alias="GOOGLE_MODEL_B",
+    )
+    google_judge_model: str = Field(
+        default="",
+        validation_alias="GOOGLE_JUDGE_MODEL",
+    )
     llm_request_delay_seconds: float = Field(
         default=0.0,
         validation_alias="LLM_REQUEST_DELAY_SECONDS",

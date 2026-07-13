@@ -127,7 +127,9 @@ def build_document_pdf(record: GeneratedContent) -> bytes:
         )
 
     story.append(Spacer(1, 8))
-    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0")))
+    story.append(
+        HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0"))
+    )
 
     if record.subject:
         story.append(

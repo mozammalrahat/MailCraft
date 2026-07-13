@@ -3,22 +3,18 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from app.application.pipelines.generation_context import GenerationContext
 from app.application.pipelines.steps.humanize_content_step import HumanizeContentStep
-from app.core.configuration import Settings
 from app.core.exceptions import LlmError
 from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
 from app.domain.enums.generation_kind import GenerationKind
+from tests.support.settings_factory import build_test_settings
 
 
 def _app_doc_context(**overrides) -> GenerationContext:
     context = GenerationContext(
         user_id=1,
         generation_kind=GenerationKind.APPLICATION_DOCUMENT,
-        settings=Settings(
-            google_api_key="test-key",
-            GOOGLE_MODEL_A="gemini-test",
-            humanize_content_enabled=True,
-        ),
+        settings=build_test_settings(humanize_content_enabled=True),
         database_session=MagicMock(),
         language_model_client=MagicMock(),
         purpose=ApplicationPurpose.INTERVIEW,
@@ -58,6 +54,7 @@ async def test_humanize_content_step_preserves_raw_and_updates_body() -> None:
     result = await HumanizeContentStep().process(context)
 
     assert result.raw_subject == "Follow-Up Regarding Product Demonstration"
+    assert result.raw_body is not None
     assert "Furthermore" in result.raw_body
     assert result.subject == "Quick follow-up"
     assert "Hi Alex" in result.body
@@ -73,11 +70,7 @@ async def test_humanize_content_step_skips_when_disabled() -> None:
     language_model_client.generate_content = AsyncMock()
 
     context = _app_doc_context(
-        settings=Settings(
-            google_api_key="test-key",
-            GOOGLE_MODEL_A="gemini-test",
-            humanize_content_enabled=False,
-        ),
+        settings=build_test_settings(humanize_content_enabled=False),
         language_model_client=language_model_client,
     )
     context.body = "Original body"
@@ -114,8 +107,7 @@ async def test_humanize_content_step_fallback_when_facts_dropped() -> None:
     language_model_client = MagicMock()
     language_model_client.generate_content = AsyncMock(
         return_value=(
-            "Subject: Quick follow-up\n\n"
-            "Hi Alex,\n\nThanks again for the conversation."
+            "Subject: Quick follow-up\n\nHi Alex,\n\nThanks again for the conversation."
         )
     )
 

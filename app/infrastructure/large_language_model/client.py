@@ -22,6 +22,14 @@ _RETRYABLE_STATUS_CODES = {429, 500, 503}
 T = TypeVar("T")
 
 
+def _response_text(response: object) -> str:
+    """Extract text from a GenAI response object when present."""
+    text = getattr(response, "text", None)
+    if text is None:
+        return ""
+    return str(text)
+
+
 class LargeLanguageModelClient:
     def __init__(
         self,
@@ -166,7 +174,7 @@ class LargeLanguageModelClient:
                 user_prompt=user_prompt,
                 model=resolved_model,
             )
-            research_context = (research_response.text or "").strip()
+            research_context = _response_text(research_response).strip()
 
         structured_prompt = user_prompt
         if research_context:

@@ -88,7 +88,9 @@ def _strip_subject_line(body: str, subject: str | None) -> str:
 
 
 def _normalize_paragraphs(text: str) -> str:
-    paragraphs = [paragraph.strip() for paragraph in text.split("\n\n") if paragraph.strip()]
+    paragraphs = [
+        paragraph.strip() for paragraph in text.split("\n\n") if paragraph.strip()
+    ]
     return "\n\n".join(paragraphs)
 
 

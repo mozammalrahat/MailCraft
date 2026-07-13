@@ -1,29 +1,24 @@
 import json
 import logging
 
-from app.core.configuration import Settings
 from app.core.logging.setup import configure_logging
+from tests.support.settings_factory import build_test_settings
 
 
 def test_configure_logging_json_format() -> None:
-    settings = Settings(
-        GOOGLE_MODEL_A="gemini-test",
-        GOOGLE_MODEL_B="gemini-test",
-        GOOGLE_JUDGE_MODEL="gemini-test",
+    settings = build_test_settings(
         log_format="json",
         debug=False,
     )
     configure_logging(settings=settings)
 
     test_logger = logging.getLogger("test.configure_logging")
-    record_handler = logging.Handler()
     captured: list[str] = []
 
     class CaptureHandler(logging.Handler):
         def emit(self, record: logging.LogRecord) -> None:
             captured.append(record.getMessage())
 
-    handler = CaptureHandler()
     root = logging.getLogger()
     root.handlers[0].setLevel(logging.INFO)
 

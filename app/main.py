@@ -55,10 +55,15 @@ def create_app() -> FastAPI:
     )
 
     application.state.limiter = limiter
-    application.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    application.add_exception_handler(
+        RateLimitExceeded,
+        _rate_limit_exceeded_handler,  # type: ignore[arg-type]
+    )
     application.add_middleware(RequestLoggingMiddleware)
     application.add_middleware(
-        CsrfMiddleware, csrf_enabled=settings.csrf_enabled, debug=settings.debug
+        CsrfMiddleware,  # type: ignore[arg-type]
+        csrf_enabled=settings.csrf_enabled,
+        debug=settings.debug,
     )
     application.add_middleware(SecurityHeadersMiddleware)
     register_exception_handlers(application)

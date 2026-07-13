@@ -14,12 +14,8 @@ def serialize_generated_content(
     include_raw_content: bool = False,
 ) -> GeneratedContentResponse:
     """Convert a generated content ORM instance to API response."""
-    purpose = (
-        ApplicationPurpose(record.purpose) if record.purpose else None
-    )
-    document_type = (
-        DocumentType(record.document_type) if record.document_type else None
-    )
+    purpose = ApplicationPurpose(record.purpose) if record.purpose else None
+    document_type = DocumentType(record.document_type) if record.document_type else None
     scenario_name = ""
     if record.scenario is not None:
         scenario_name = record.scenario.name

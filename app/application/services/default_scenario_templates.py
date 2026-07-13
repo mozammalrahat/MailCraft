@@ -1,4 +1,5 @@
 """Default scenario templates seeded on user registration."""
+# ruff: noqa: E501
 
 from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType

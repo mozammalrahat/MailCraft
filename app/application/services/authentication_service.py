@@ -174,7 +174,9 @@ def register_user(database_session: Session, email: str, password: str) -> User:
 
 
 def authenticate_user(
-    database_session: Session, email: str, password: str,
+    database_session: Session,
+    email: str,
+    password: str,
 ) -> User | None:
     """Authenticate a user by email and password."""
     user = database_session.query(User).filter(User.email == email.lower()).first()
@@ -184,7 +186,9 @@ def authenticate_user(
 
 
 def get_user_from_access_token(
-    database_session: Session, token: str, settings: Settings,
+    database_session: Session,
+    token: str,
+    settings: Settings,
 ) -> User:
     """Resolve a user from an access token."""
     payload = decode_token(token, settings)

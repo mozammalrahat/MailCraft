@@ -9,7 +9,9 @@ class S3FileStorage:
 
     def __init__(self, settings: Settings) -> None:
         if not settings.s3_bucket:
-            raise ServiceValidationError("S3_BUCKET is required when STORAGE_BACKEND=s3")
+            raise ServiceValidationError(
+                "S3_BUCKET is required when STORAGE_BACKEND=s3"
+            )
         self._settings = settings
         self._client = None
 

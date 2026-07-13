@@ -22,16 +22,11 @@ from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
 from app.domain.enums.generation_kind import GenerationKind
 from reportlab.pdfgen import canvas
+from tests.support.settings_factory import build_test_settings
 
 
 def _make_settings(**overrides) -> Settings:
-    defaults = dict(
-        GOOGLE_MODEL_A="gemini-test",
-        GOOGLE_MODEL_B="gemini-test-b",
-        GOOGLE_JUDGE_MODEL="gemini-test-judge",
-    )
-    defaults.update(overrides)
-    return Settings(**defaults)
+    return build_test_settings(**overrides)
 
 
 def _make_context(generation_kind: GenerationKind, **kwargs) -> GenerationContext:

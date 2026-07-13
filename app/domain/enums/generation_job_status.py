@@ -1,9 +1,9 @@
 """Generation job status values."""
 
-from enum import Enum
+from enum import StrEnum
 
 
-class GenerationJobStatus(str, Enum):
+class GenerationJobStatus(StrEnum):
     """Lifecycle states for async generation jobs."""
 
     QUEUED = "queued"

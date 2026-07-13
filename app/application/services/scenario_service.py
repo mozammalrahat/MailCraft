@@ -111,7 +111,9 @@ class ScenarioService:
         if remaining == 0:
             raise HTTPException(
                 status_code=400,
-                detail="Cannot delete the last scenario for this purpose and document type",
+                detail=(
+                    "Cannot delete the last scenario for this purpose and document type"
+                ),
             )
         self._database_session.delete(scenario)
         self._database_session.commit()

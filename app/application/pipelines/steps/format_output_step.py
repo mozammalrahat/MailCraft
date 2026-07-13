@@ -25,10 +25,7 @@ class FormatOutputStep:
         )
         formatted_body = format_document_body(raw_body)
 
-        if (
-            context.document_type == DocumentType.EMAIL
-            and not subject
-        ):
+        if context.document_type == DocumentType.EMAIL and not subject:
             raise LlmError("Generated email is missing a subject line")
 
         context.subject = subject

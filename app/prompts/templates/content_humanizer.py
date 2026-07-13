@@ -1,4 +1,5 @@
 """Static humanization instructions for professional email and cover letter content."""
+# ruff: noqa: E501
 
 CONTENT_HUMANIZER_SYSTEM_RULES = """
 You rewrite AI-generated professional writing so it reads like a thoughtful person wrote it.

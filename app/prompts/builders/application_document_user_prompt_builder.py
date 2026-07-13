@@ -1,4 +1,5 @@
 """Build user prompts for application document generation."""
+# ruff: noqa: E501
 
 from app.application.services.email_formatting_service import BODY_FORMAT_INSTRUCTIONS
 from app.domain.enums.application_purpose import ApplicationPurpose
