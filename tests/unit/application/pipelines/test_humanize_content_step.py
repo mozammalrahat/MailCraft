@@ -45,17 +45,17 @@ async def test_humanize_content_step_preserves_raw_and_updates_body() -> None:
 
     context = _app_doc_context(language_model_client=language_model_client)
     context.subject = "Follow-Up Regarding Product Demonstration"
-    context.body = (
+    original_body = (
         "Dear Recipient,\n\n"
         "Furthermore, I am writing to delve into the pivotal outcomes "
         "from our recent demonstration on Tuesday. Pricing for 50 seats is attached."
     )
+    context.body = original_body
 
     result = await HumanizeContentStep().process(context)
 
     assert result.raw_subject == "Follow-Up Regarding Product Demonstration"
-    assert result.raw_body is not None
-    assert "Furthermore" in result.raw_body
+    assert result.raw_body == original_body
     assert result.subject == "Quick follow-up"
     assert "Hi Alex" in result.body
     assert result.humanization_applied is True

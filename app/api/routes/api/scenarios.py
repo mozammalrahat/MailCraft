@@ -1,7 +1,6 @@
 from app.api.dependencies.authentication import CurrentUserDependency
 from app.api.dependencies.database import DatabaseSessionDependency
 from app.application.services.scenario_service import ScenarioService
-from app.database.models.scenario import Scenario
 from app.domain.enums.application_purpose import ApplicationPurpose
 from app.domain.enums.document_type import DocumentType
 from app.schemas.scenario import (
@@ -20,13 +19,14 @@ def list_scenarios(
     current_user: CurrentUserDependency,
     purpose: ApplicationPurpose | None = None,
     document_type: DocumentType | None = None,
-) -> list[Scenario]:
+) -> list[ScenarioResponse]:
     service = ScenarioService(database_session)
-    return service.list_for_user(
+    scenarios = service.list_for_user(
         current_user.id,
         purpose=purpose,
         document_type=document_type,
     )
+    return [ScenarioResponse.model_validate(scenario) for scenario in scenarios]
 
 
 @router.post("", response_model=ScenarioResponse, status_code=201)
@@ -34,9 +34,9 @@ def create_scenario(
     payload: ScenarioCreateRequest,
     database_session: DatabaseSessionDependency,
     current_user: CurrentUserDependency,
-) -> Scenario:
+) -> ScenarioResponse:
     service = ScenarioService(database_session)
-    return service.create(current_user.id, payload)
+    return ScenarioResponse.model_validate(service.create(current_user.id, payload))
 
 
 @router.patch("/{scenario_id}", response_model=ScenarioResponse)
@@ -45,9 +45,11 @@ def update_scenario(
     payload: ScenarioUpdateRequest,
     database_session: DatabaseSessionDependency,
     current_user: CurrentUserDependency,
-) -> Scenario:
+) -> ScenarioResponse:
     service = ScenarioService(database_session)
-    return service.update_owned(current_user.id, scenario_id, payload)
+    return ScenarioResponse.model_validate(
+        service.update_owned(current_user.id, scenario_id, payload)
+    )
 
 
 @router.post("/{scenario_id}/clone", response_model=ScenarioResponse, status_code=201)
@@ -56,9 +58,11 @@ def clone_scenario(
     database_session: DatabaseSessionDependency,
     current_user: CurrentUserDependency,
     name: str | None = Query(default=None),
-) -> Scenario:
+) -> ScenarioResponse:
     service = ScenarioService(database_session)
-    return service.clone_owned(current_user.id, scenario_id, name=name)
+    return ScenarioResponse.model_validate(
+        service.clone_owned(current_user.id, scenario_id, name=name)
+    )
 
 
 @router.delete("/{scenario_id}", status_code=204)

@@ -101,7 +101,12 @@ async def process_generation_job(ctx: dict, job_id: str) -> dict[str, str | int 
 
 
 def run_worker() -> None:
-    """Run the ARQ worker process."""
+    """Run the ARQ worker process (blocking).
+
+    ``arq.run_worker`` is synchronous: it builds a Worker and calls
+    ``worker.run()``, which owns the event loop. Do not wrap this in
+    ``asyncio.run`` or ``await``.
+    """
     from arq import run_worker as arq_run_worker
     from arq.connections import RedisSettings
 
